@@ -1,19 +1,21 @@
-name: CI
+name: CI Frontend
 
 on:
   push:
     branches: [ "main" ]
   pull_request:
     branches: [ "main" ]
+  workflow_dispatch:
 
 jobs:
-  build:
+  build-frontend:
     runs-on: ubuntu-latest
     
-    # 👇 ESTO SOLUCIONA TU ERROR
+    # 👇 AQUÍ ESTÁ LA MAGIA
+    # Le decimos a GitHub: "Todos los comandos ejecútalos dentro de 'frontend'"
     defaults:
       run:
-        working-directory: ./temp-next
+        working-directory: ./frontend
 
     steps:
       - uses: actions/checkout@v3
@@ -22,16 +24,15 @@ jobs:
         uses: actions/setup-node@v3
         with:
           node-version: 18
-          # Importante: para el caché, hay que decirle dónde está el lock file
-        #   cache: 'npm'
-        #   cache-dependency-path: './temp-next/package-lock.json'
+          # Cache desactivado por ahora para asegurar el éxito
 
       - name: Install dependencies
+        # IMPORTANTE: Esto funcionará si dentro de la carpeta 'frontend' 
+        # existe un package-lock.json. Si falla, cámbialo por 'npm install'
         run: npm ci
-        # Ya no hace falta poner working-directory aquí porque lo definimos arriba en 'defaults'
 
       - name: Run build
         run: npm run build
 
       - name: Run tests
-        run: npm run test || echo "No tests configured"
+        run: npm run test || echo "Saltando tests..."
