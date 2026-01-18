@@ -1,0 +1,8 @@
+services:
+  backend:
+    build: ./backend
+    ports:
+      - "3004:3000"
+    volumes:
+      - ./backend:/app
+    command: npm start
