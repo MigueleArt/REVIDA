@@ -1,31 +1,37 @@
-name: CI/CD Next.js
+name: CI
 
 on:
   push:
-    branches:
-      - main
+    branches: [ "main" ]
   pull_request:
-    branches:
-      - main
+    branches: [ "main" ]
 
 jobs:
   build:
     runs-on: ubuntu-latest
+    
+    # 👇 ESTO SOLUCIONA TU ERROR
+    defaults:
+      run:
+        working-directory: ./temp-next
 
     steps:
-    - name: Checkout repository
-      uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
-    - name: Setup Node.js
-      uses: actions/setup-node@v3
-      with:
-        node-version: 18
+      - name: Set up Node.js
+        uses: actions/setup-node@v3
+        with:
+          node-version: 18
+          # Importante: para el caché, hay que decirle dónde está el lock file
+          cache: 'npm'
+          cache-dependency-path: './temp-next/package-lock.json'
 
-    - name: Install dependencies
-      run: npm ci
+      - name: Install dependencies
+        run: npm ci
+        # Ya no hace falta poner working-directory aquí porque lo definimos arriba en 'defaults'
 
-    - name: Build project
-      run: npm run build
+      - name: Run build
+        run: npm run build
 
-    - name: Run tests
-      run: npm run test || echo "No tests configured"
+      - name: Run tests
+        run: npm run test || echo "No tests configured"
