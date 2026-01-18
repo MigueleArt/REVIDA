@@ -13,19 +13,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - name: Check out repository
-        uses: actions/checkout@v3
+      - uses: actions/checkout@v3
 
       - name: Set up Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
 
+      - name: Move to project folder
+        run: cd temp-next
+
       - name: Install dependencies
-        run: npm install
+        run: npm ci
+        working-directory: temp-next
 
       - name: Run build
         run: npm run build
+        working-directory: temp-next
 
       - name: Run tests
-        run: npm run test || echo "No hay tests configurados"
+        run: npm run test || echo "No tests configured"
+        working-directory: temp-next
