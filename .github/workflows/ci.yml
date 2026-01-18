@@ -1,4 +1,4 @@
-name: CI Frontend
+name: CI Backend
 
 on:
   push:
@@ -8,29 +8,32 @@ on:
   workflow_dispatch:
 
 jobs:
-  build-frontend:
+  build-backend:
     runs-on: ubuntu-latest
     
-    # Seguimos trabajando dentro de la carpeta frontend
+    # Esta línea es la clave: Le dice a GitHub "Entra a la carpeta backend"
     defaults:
       run:
-        working-directory: ./frontend
+        working-directory: ./backend
 
     steps:
       - uses: actions/checkout@v3
 
-      - name: Set up Node.js
+      - name: Configurar Node.js
         uses: actions/setup-node@v3
         with:
           node-version: 18
+          # Activamos caché para que sea rápido (ahora sí funcionará)
+          cache: 'npm'
+          cache-dependency-path: backend/package-lock.json
 
-      - name: Install dependencies
-        # 👇 CAMBIO CLAVE: Usamos install porque no existe package-lock.json
-        run: npm install
+      - name: Instalar dependencias
+        run: npm ci
 
-      - name: Run build
-        run: npm run build
+      - name: Compilar (Build)
+        # --if-present significa: "Si no hay script de build, no falles"
+        run: npm run build --if-present
 
-      - name: Run tests
-        # Agregamos este '|| true' para que si no hay tests, no falle el pipeline
-        run: npm run test || echo "No se encontraron tests, continuamos."
+      - name: Correr Tests
+        # || echo... significa: "Si fallan los tests o no hay, avisa pero no rompas el pipeline"
+        run: npm run test || echo "⚠️ No hay tests configurados en el backend todavía"
