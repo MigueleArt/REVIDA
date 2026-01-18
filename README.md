@@ -1,3 +1,4 @@
+[![CI Backend](https://github.com/MigueleArt/REVIDA/actions/workflows/ci.yml/badge.svg)](https://github.com/MigueleArt/REVIDA/actions/workflows/ci.yml)
 # Desarrollo Web Profesional – Equipo 2
 
 Repositorio del proyecto para la materia **Desarrollo Web Profesional**.
