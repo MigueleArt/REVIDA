@@ -23,8 +23,8 @@ jobs:
         with:
           node-version: 18
           # Importante: para el caché, hay que decirle dónde está el lock file
-          cache: 'npm'
-          cache-dependency-path: './temp-next/package-lock.json'
+        #   cache: 'npm'
+        #   cache-dependency-path: './temp-next/package-lock.json'
 
       - name: Install dependencies
         run: npm ci
