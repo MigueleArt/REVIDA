@@ -1,0 +1,13 @@
+{
+  "name": "revida-frontend",
+  "version": "1.0.0",
+  "description": "Frontend provisional",
+  "main": "index.js",
+  "scripts": {
+    "build": "echo 'Construyendo frontend...' && exit 0",
+    "test": "echo 'No tests yet' && exit 0"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC"
+}
