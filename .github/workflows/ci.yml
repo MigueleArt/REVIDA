@@ -1,4 +1,4 @@
-name: CI Backend
+name: CI Completo (Backend + Frontend)
 
 on:
   push:
@@ -8,32 +8,53 @@ on:
   workflow_dispatch:
 
 jobs:
+  # TRABAJO 1: BACKEND
   build-backend:
+    name: Backend Check
     runs-on: ubuntu-latest
-    
-    # Esta línea es la clave: Le dice a GitHub "Entra a la carpeta backend"
     defaults:
       run:
         working-directory: ./backend
-
     steps:
-      - uses: actions/checkout@v3
-
-      - name: Configurar Node.js
-        uses: actions/setup-node@v3
+      - uses: actions/checkout@v4
+      
+      - name: Setup Node (Backend)
+        uses: actions/setup-node@v4
         with:
           node-version: 18
-          # Activamos caché para que sea rápido (ahora sí funcionará)
           cache: 'npm'
           cache-dependency-path: backend/package-lock.json
-
-      - name: Instalar dependencias
+          
+      - name: Install Deps (Backend)
         run: npm ci
-
-      - name: Compilar (Build)
-        # --if-present significa: "Si no hay script de build, no falles"
+        
+      - name: Build (Backend)
         run: npm run build --if-present
 
-      - name: Correr Tests
-        # || echo... significa: "Si fallan los tests o no hay, avisa pero no rompas el pipeline"
-        run: npm run test || echo "⚠️ No hay tests configurados en el backend todavía"
+      - name: Test (Backend)
+        run: npm run test || echo "⚠️ Sin tests en backend"
+
+  # TRABAJO 2: FRONTEND (Lo nuevo)
+  build-frontend:
+    name: Frontend Check
+    needs: build-backend # Opcional: Esto hace que primero revise el back y luego el front
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: ./frontend
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node (Frontend)
+        uses: actions/setup-node@v4
+        with:
+          node-version: 18
+          # Importante: Caché separado para el frontend
+          cache: 'npm'
+          cache-dependency-path: frontend/package-lock.json
+
+      - name: Install Deps (Frontend)
+        run: npm ci
+
+      - name: Build (Frontend)
+        run: npm run build
