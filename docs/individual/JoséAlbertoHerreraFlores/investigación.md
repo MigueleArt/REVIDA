@@ -4,7 +4,6 @@
 1. Diferencia entre Página web y Aplicación web
 ------------------------------------------------
 
-
 -Interactividad: En una página web, la interacción es lineal: haces clic en un enlace y esperas a que el servidor te envíe un archivo nuevo. Es como leer una revista digital. En cambio, en una aplicación web, la interacción es fluida. El usuario puede arrastrar elementos, completar formularios que se validan al instante y recibir notificaciones sin que la pantalla se ponga en blanco. La "respuesta" es inmediata porque solo cambian partes pequeñas de la interfaz.
 
 -Objetivo y propósito: El propósito de una página web es el consumo de contenido. Su éxito se mide por cuánto tiempo lee el usuario o si encuentra la información. La aplicación web tiene un objetivo utilitario. El éxito aquí se mide por la eficiencia.
@@ -55,7 +54,6 @@ El software rompe las barreras físicas, permitiendo que la información viaje a
 El software resuelve el problema de "llegar a la gente". Antes necesitabas una tienda física; hoy necesitas una URL.
 
 
-
 --------------------------------------------
 4. Arquitectura general de aplicaciones web
 --------------------------------------------
@@ -94,3 +92,4 @@ TikTok es una aplicación donde la velocidad de entrega y el algoritmo son los p
 Problema que resuelve: Eliminar el aburrimiento mediante la entrega inmediata de contenido altamente personalizado.
 -Frontend (React): Aunque la mayoría la usa en móvil, su versión web es una Single Page Application potente. Necesitan que mientras ves un video, el siguiente ya se esté descargando en segundo plano. React maneja ese "estado" para que no sientas interrupciones.
 -Backend y Datos (MongoDB): TikTok genera terabytes de datos por segundo (likes, visualizaciones, comentarios). Necesitan bases de datos NoSQL (como MongoDB) que puedan escalar horizontalmente, es decir, que puedan repartir la carga entre cientos de servidores para no colapsar cuando un video se hace viral.
+
