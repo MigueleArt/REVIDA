@@ -6,3 +6,7 @@ services:
     volumes:
       - ./backend:/app
     command: npm start
+
+  frontend:
+    build: ./frontend
+    command: npm run build
