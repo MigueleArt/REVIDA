@@ -2,17 +2,18 @@ import Link from 'next/link';
 
 export default function NotFound() {
   return (
-    <main style={{ padding: '2rem', textAlign: 'center' }} role="main">
-      <section aria-live="assertive" role="alert">
-        <h1>404 - Página no encontrada</h1>
-        <p>Lo sentimos, la página que buscas no existe o ha sido movida.</p>
+    <main className="center-screen" role="main">
+      <section aria-live="assertive">
+        <h1 className="title-blue">404</h1>
+        <h2>Página no encontrada</h2>
+        <p style={{ color: '#666', maxWidth: '400px' }}>
+          Lo sentimos, no pudimos encontrar lo que buscabas.
+        </p>
       </section>
       
-      <nav aria-label="Navegación de error" style={{ marginTop: '1rem' }}>
-        <Link href="/" style={{ textDecoration: 'underline', color: 'blue' }}>
-          Volver al Inicio
-        </Link>
-      </nav>
+      <Link href="/" className="btn-primary">
+        Volver al Inicio
+      </Link>
     </main>
   );
 }

@@ -1,23 +1,17 @@
-"use client"
 import Link from 'next/link';
 
 export default function Navbar() {
   return (
-    <nav 
-      style={{ 
-        position: 'sticky', 
-        top: 0, 
-        zIndex: 100, 
-        backgroundColor: 'white', 
-        borderBottom: '1px solid #ccc',
-        padding: '1rem'
-      }}
-    >
-      <ul style={{ display: 'flex', gap: '1rem', listStyle: 'none', margin: 0 }}>
-        <li><Link href="/">Inico</Link></li>
-        <li><Link href="/dashboard">Donaciones</Link></li>
-        <li><Link href="/dashboard">Dashboard</Link></li>
+    <nav className="navbar">
+      <div style={{ fontWeight: 'bold', fontSize: '1.5rem', color: '#2563EB' }}>
+        Revida
+      </div>
+
+      <ul className="nav-links">
+        <li><Link href="/" className="nav-link">Inicio</Link></li>
+        <li><Link href="/donaciones" className="nav-link">Donaciones</Link></li>
+        <li><Link href="/dashboard" className="nav-link">Dashboard</Link></li>
       </ul>
     </nav>
-  );  
+  );
 }
