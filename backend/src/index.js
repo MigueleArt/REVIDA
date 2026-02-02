@@ -10,6 +10,17 @@ const server = http.createServer((req, res) => {
         message: "Revida backend running" 
     }));
   } 
+
+  else if (req.url === "/error-test") {
+    res.writeHead(500);
+    res.end(JSON.stringify({ 
+      status: "error",
+      error: 500, 
+      message: "Error interno en el servidor de REVIDA",
+      details: "No se pudo conectar con la base de datos.",
+      next_steps: "El equipo técnico ha sido notificado. Por favor, intenta de nuevo más tarde."
+    }));
+  }
   // error 404
   else {
     res.writeHead(404);
