@@ -17,7 +17,12 @@ export default function HomePage() {
       </p>
       
       <div style={{ display: 'flex', gap: '15px' }}>
-        
+
+        {/*login*/}
+        <Link href="/auth/login" className="btn-primary" style={{ marginTop: 0 }}>
+          Iniciar Sesión
+        </Link>
+       
         <Link href="/donaciones" className="btn-primary" style={{ marginTop: 0 }}>
           Explorar Donaciones
         </Link>
