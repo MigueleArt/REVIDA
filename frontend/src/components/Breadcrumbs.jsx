@@ -5,7 +5,8 @@ import Link from 'next/link';
 
 export default function Breadcrumbs() {
   const pathname = usePathname();
-    if (pathname === '/') return null;
+  
+if (pathname === '/' || pathname.startsWith('/auth')) return null;
 
   const pathSegments = pathname.split('/').filter(segment => segment !== '');
 

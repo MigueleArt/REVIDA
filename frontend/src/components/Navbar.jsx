@@ -1,6 +1,34 @@
+'use client';
+
 import Link from 'next/link';
+import { usePathname } from 'next/navigation'; 
 
 export default function Navbar() {
+  const pathname = usePathname();
+
+  if (pathname.startsWith('/auth')) {
+    return null;
+  }
+
+  const isActive = (path) => pathname === path;
+  const getLinkStyle = (path) => {
+    const active = isActive(path);
+    return {
+      textDecoration: 'none',
+      padding: '8px 16px',
+      borderRadius: '6px',
+      fontSize: '0.95rem',
+      fontWeight: '500',
+      display: 'flex',
+      alignItems: 'center',
+      gap: '8px',
+      transition: 'all 0.2s',
+      color: active ? '#2563EB' : '#6B7280',
+      backgroundColor: active ? '#EFF6FF' : 'transparent',
+    };
+  };
+
+  
   return (
     <header style={{
       backgroundColor: '#ffffff',
@@ -32,12 +60,14 @@ export default function Navbar() {
           </Link>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-
+            <span style={{ fontSize: '0.95rem', color: '#4B5563', display: 'none', '@media (min-width: 640px)': { display: 'block' } }}>
+              Hola, <b style={{ color: '#111827' }}>Usuario Demo</b>
+            </span>
             <Link href="/auth/login" style={styles.logoutButton}>
               <svg width="18" height="18" fill="none" stroke="currentColor" strokeWidth="2" viewBox="0 0 24 24" style={{ transform: 'rotate(180deg)' }}>
-                <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
+                 <path strokeLinecap="round" strokeLinejoin="round" d="M17 16l4-4m0 0l-4-4m4 4H7m6 4v1a3 3 0 01-3 3H6a3 3 0 01-3-3V7a3 3 0 013-3h4a3 3 0 013 3v1" />
               </svg>
-              Login
+              Salir
             </Link>
           </div>
         </div>
