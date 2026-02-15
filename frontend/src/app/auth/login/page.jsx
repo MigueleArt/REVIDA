@@ -88,7 +88,7 @@ export default function LoginPage() {
             backgroundColor: '#FEE2E2', color: '#B91C1C', 
             padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'left'
           }}>
-            error {error}
+            Ingrese sus datos correctamente: {error}
           </div>
         )}
 
