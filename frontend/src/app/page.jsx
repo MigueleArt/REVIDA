@@ -20,7 +20,7 @@ export default function HomePage() {
 
         
        
-        <Link href="/donaciones" className="btn-primary" style={{ marginTop: 0 }}>
+        <Link href="/dashboard/mis-donativos" className="btn-primary" style={{ marginTop: 0 }}>
           Explorar Donaciones
         </Link>
 
