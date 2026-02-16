@@ -1,60 +1,52 @@
-name: CI Completo (Backend + Frontend)
+name: Node.js CI
 
 on:
   push:
-    branches: [ "main" ]
+    branches: [ "**" ]
   pull_request:
-    branches: [ "main" ]
-  workflow_dispatch:
+    branches: [ "**" ]
 
 jobs:
-  # TRABAJO 1: BACKEND
-  build-backend:
-    name: Backend Check
+  frontend-test:
     runs-on: ubuntu-latest
-    defaults:
-      run:
-        working-directory: ./backend
-    steps:
-      - uses: actions/checkout@v4
-      
-      - name: Setup Node (Backend)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          cache: 'npm'
-          cache-dependency-path: backend/package-lock.json
-          
-      - name: Install Deps (Backend)
-        run: npm ci
-        
-      - name: Build (Backend)
-        run: npm run build --if-present
 
-      - name: Test (Backend)
-        run: npm run test || echo "⚠️ Sin tests en backend"
-
-  # TRABAJO 2: FRONTEND (Lo nuevo)
-  build-frontend:
-    name: Frontend Check
-    needs: build-backend # Opcional: Esto hace que primero revise el back y luego el front
-    runs-on: ubuntu-latest
     defaults:
       run:
         working-directory: ./frontend
+
     steps:
-      - uses: actions/checkout@v4
+    - uses: actions/checkout@v3
+    - name: Use Node.js 20
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+        cache: 'npm'
+        cache-dependency-path: frontend/package-lock.json
 
-      - name: Setup Node (Frontend)
-        uses: actions/setup-node@v4
-        with:
-          node-version: 18
-          # Importante: Caché separado para el frontend
-          cache: 'npm'
-          cache-dependency-path: frontend/package-lock.json
+    - name: Install Dependencies
+      run: npm ci
 
-      - name: Install Deps (Frontend)
-        run: npm ci
+    - name: Run Tests
+      run: npm test
 
-      - name: Build (Frontend)
-        run: npm run build
+  backend-test:
+    runs-on: ubuntu-latest
+
+    defaults:
+      run:
+        working-directory: ./backend
+
+    steps:
+    - uses: actions/checkout@v3
+    - name: Use Node.js 20
+      uses: actions/setup-node@v3
+      with:
+        node-version: 20
+        cache: 'npm'
+        cache-dependency-path: backend/package-lock.json
+
+    - name: Install Dependencies
+      run: npm ci
+
+    - name: Run Tests
+      run: npm test
