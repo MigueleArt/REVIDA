@@ -2,9 +2,10 @@
 
 import { useState, useRef } from 'react';
 import CardDonacion from '../../../components/CardDonacion';
+import AccessibleLoader from '../../../components/AccessibleLoader';
 
 export default function MisDonativosPage() {
-  
+
   // --- 1. DATOS (MOCK) ---
   const allDonaciones = [
     { id: 1, titulo: 'Laptop Asus', descripcion: 'Laptop en buen estado, ideal para estudiantes.', ubicacion: 'Ciudad Ajalpan', fecha: '2026-02-01', usuario: 'Fatima Avelino', categoria: 'Electrónicos', icono: '💻' },
@@ -19,9 +20,9 @@ export default function MisDonativosPage() {
   const [searchTerm, setSearchTerm] = useState('');
   const [category, setCategory] = useState('Todas');
   const [isLoading, setIsLoading] = useState(false);
-  const [feedback, setFeedback] = useState(''); 
+  const [feedback, setFeedback] = useState('');
 
-  const searchInputRef = useRef(null); 
+  const searchInputRef = useRef(null);
 
   const handleSearch = () => {
     setIsLoading(true);
@@ -46,26 +47,26 @@ export default function MisDonativosPage() {
       setSearchTerm('');
       setCategory('Todas');
       setDonaciones(allDonaciones);
-      searchInputRef.current?.focus(); 
+      searchInputRef.current?.focus();
     }
   };
 
   // --- 3. RENDERIZADO CON ESTILO ---
   return (
-    <div style={{ 
-      padding: '40px', 
+    <div style={{
+      padding: '40px',
       backgroundColor: '#F9FAFB', // Fondo gris muy suave (hace resaltar las cards)
       minHeight: '100vh',
       fontFamily: 'system-ui, sans-serif'
     }}>
-      
+
       {/* Feedback Accesible (Oculto visualmente) */}
       <div role="status" aria-live="polite" style={{ position: 'absolute', width: '1px', height: '1px', overflow: 'hidden' }}>
         {feedback}
       </div>
 
       <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-        
+
         {/* ENCABEZADO */}
         <div style={{ marginBottom: '32px' }}>
           <h1 style={{ fontSize: '2rem', fontWeight: '800', color: '#111827', marginBottom: '8px', letterSpacing: '-0.5px' }}>
@@ -78,27 +79,27 @@ export default function MisDonativosPage() {
 
         {/* BARRA DE HERRAMIENTAS (Buscador + Filtro + Botón) */}
         <div style={{ marginBottom: '32px', display: 'flex', gap: '16px', flexWrap: 'wrap' }}>
-          
+
           {/* Caja Blanca Unificada */}
-          <div style={{ 
-            display: 'flex', 
-            alignItems: 'center', 
-            backgroundColor: 'white', 
-            border: '1px solid #E5E7EB', 
-            borderRadius: '12px', 
+          <div style={{
+            display: 'flex',
+            alignItems: 'center',
+            backgroundColor: 'white',
+            border: '1px solid #E5E7EB',
+            borderRadius: '12px',
             padding: '6px 16px', // Padding interno cómodo
             boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
             flex: 1, // Ocupa el espacio disponible
             minWidth: '300px',
             transition: 'box-shadow 0.2s, border-color 0.2s'
           }}>
-            
+
             {/* Sección INPUT */}
             <div style={{ display: 'flex', alignItems: 'center', flex: 1 }}>
               <svg width="20" height="20" fill="none" stroke="#9CA3AF" strokeWidth="2" viewBox="0 0 24 24" style={{ marginRight: '12px' }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
               </svg>
-              <input 
+              <input
                 ref={searchInputRef}
                 type="text"
                 placeholder="Buscar (ej. Laptop, Ropa)..."
@@ -124,7 +125,7 @@ export default function MisDonativosPage() {
               <svg width="20" height="20" fill="none" stroke="#2563EB" strokeWidth="2" viewBox="0 0 24 24" style={{ marginRight: '8px' }}>
                 <path strokeLinecap="round" strokeLinejoin="round" d="M3 4a1 1 0 011-1h16a1 1 0 011 1v2.586a1 1 0 01-.293.707l-6.414 6.414a1 1 0 00-.293.707V17l-4 4v-6.586a1 1 0 00-.293-.707L3.293 7.293A1 1 0 013 6.586V4z" />
               </svg>
-              <select 
+              <select
                 value={category}
                 onChange={(e) => setCategory(e.target.value)}
                 style={{
@@ -138,18 +139,18 @@ export default function MisDonativosPage() {
                   minWidth: '140px'
                 }}
               >
-                 <option value="Todas">Todas</option>
-                  <option value="Ropa">Ropa</option>
-                  <option value="Electrónicos">Electrónicos</option>
-                  <option value="Muebles">Muebles</option>
-                  <option value="Libros">Libros</option>
-                  <option value="Deportes">Deportes</option>
+                <option value="Todas">Todas</option>
+                <option value="Ropa">Ropa</option>
+                <option value="Electrónicos">Electrónicos</option>
+                <option value="Muebles">Muebles</option>
+                <option value="Libros">Libros</option>
+                <option value="Deportes">Deportes</option>
               </select>
             </div>
           </div>
 
           {/* BOTÓN DE BÚSQUEDA */}
-          <button 
+          <button
             onClick={handleSearch}
             style={{
               backgroundColor: '#2563EB', // Azul Revida
@@ -173,14 +174,12 @@ export default function MisDonativosPage() {
 
         {/* --- GRID DE RESULTADOS --- */}
         {isLoading ? (
-          <div style={{ textAlign: 'center', padding: '60px', color: '#6B7280' }}>
-            <p style={{ fontSize: '1.1rem' }}>Cargando donaciones...</p>
-          </div>
+          <AccessibleLoader message="Buscando donaciones..." icon="donaciones" />
         ) : donaciones.length > 0 ? (
-          <div style={{ 
-            display: 'grid', 
+          <div style={{
+            display: 'grid',
             gridTemplateColumns: 'repeat(auto-fill, minmax(320px, 1fr))', // Tarjetas un poco más anchas
-            gap: '30px' 
+            gap: '30px'
           }}>
             {donaciones.map((item) => (
               <CardDonacion key={item.id} item={item} />
@@ -188,10 +187,10 @@ export default function MisDonativosPage() {
           </div>
         ) : (
           // Estado Vacío Elegante
-          <div style={{ 
-            textAlign: 'center', 
-            padding: '60px', 
-            backgroundColor: 'white', 
+          <div style={{
+            textAlign: 'center',
+            padding: '60px',
+            backgroundColor: 'white',
             borderRadius: '16px',
             border: '2px dashed #E5E7EB',
             marginTop: '20px'
@@ -202,16 +201,16 @@ export default function MisDonativosPage() {
             <p style={{ color: '#6B7280', fontSize: '1rem', marginBottom: '20px' }}>
               Intenta buscar con otro término o cambia la categoría.
             </p>
-            <button 
+            <button
               onClick={() => { setSearchTerm(''); setCategory('Todas'); setDonaciones(allDonaciones); }}
-              style={{ 
-                color: '#2563EB', 
-                background: 'none', 
-                border: 'none', 
-                cursor: 'pointer', 
+              style={{
+                color: '#2563EB',
+                background: 'none',
+                border: 'none',
+                cursor: 'pointer',
                 fontWeight: '600',
                 fontSize: '1rem',
-                textDecoration: 'underline' 
+                textDecoration: 'underline'
               }}
             >
               Limpiar filtros

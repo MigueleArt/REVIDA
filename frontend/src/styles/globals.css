@@ -58,3 +58,33 @@
 .btn-primary:hover {
   background-color: #1d4ed8; 
 }
+
+/* ========== Accessible Loader ========== */
+
+@keyframes revida-spin {
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
+}
+
+.revida-spinner {
+  animation: revida-spin 1s linear infinite;
+}
+
+.revida-loader {
+  background-color: white;
+  border-radius: 16px;
+  border: 2px dashed #E5E7EB;
+}
+
+/* Screen-reader only (visually hidden) */
+.sr-only {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip: rect(0, 0, 0, 0);
+  white-space: nowrap;
+  border-width: 0;
+}
