@@ -3,33 +3,35 @@ import http from "http";
 const server = http.createServer((req, res) => {
   res.setHeader("Content-Type", "application/json");
 
-  if (req.url === "/") {
+  // Ruta principal
+  if (req.method === "GET" && req.url === "/") {
     res.writeHead(200);
-    res.end(JSON.stringify({ 
-        status: "success", 
-        message: "Revida backend running" 
+    return res.end(JSON.stringify({
+      success: true,
+      message: "Revida backend running"
     }));
-  } 
+  }
 
-  else if (req.url === "/error-test") {
-    res.writeHead(500);
-    res.end(JSON.stringify({ 
-      status: "error",
-      error: 500, 
-      message: "Error interno en el servidor de REVIDA",
-      details: "No se pudo conectar con la base de datos.",
-      next_steps: "El equipo técnico ha sido notificado. Por favor, intenta de nuevo más tarde."
+  // Endpoint ejemplo REST
+  if (req.method === "GET" && req.url === "/api/usuarios") {
+    const usuarios = [
+      { id: 1, nombre: "Alan" },
+      { id: 2, nombre: "Miguel" }
+    ];
+
+    res.writeHead(200);
+    return res.end(JSON.stringify({
+      success: true,
+      data: usuarios
     }));
   }
-  // error 404
-  else {
-    res.writeHead(404);
-    res.end(JSON.stringify({ 
-      error: 404, 
-      message: "La ruta solicitada no existe en el sistema REVIDA",
-      hint: "Verifica si escribiste bien la URL"
-    }));
-  }
+
+  // Ruta no encontrada
+  res.writeHead(404);
+  return res.end(JSON.stringify({
+    success: false,
+    message: "Ruta no encontrada"
+  }));
 });
 
 server.listen(3000, () => {
