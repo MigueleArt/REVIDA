@@ -57,6 +57,7 @@
 
 .btn-primary:hover {
   background-color: #1d4ed8;
+  background-color: #1d4ed8; 
 }
 
 /* ========== Accessible Loader ========== */
@@ -69,6 +70,8 @@
   100% {
     transform: rotate(360deg);
   }
+  0%   { transform: rotate(0deg); }
+  100% { transform: rotate(360deg); }
 }
 
 .revida-spinner {
