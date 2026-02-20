@@ -23,7 +23,7 @@ describe('API Service — getUsuarios', () => {
 
         const result = await getUsuarios();
         expect(result).toEqual(mockData);
-        expect(global.fetch).toHaveBeenCalledWith('http://localhost:3001/api/usuarios');
+        expect(global.fetch).toHaveBeenCalledWith('https://revida.onrender.com/api/usuarios');
     });
 
     it('lanza error descriptivo cuando el servidor devuelve error', async () => {
@@ -47,7 +47,7 @@ describe('API Service — getUsuario', () => {
 
         const result = await getUsuario(2);
         expect(result).toEqual(mockData);
-        expect(global.fetch).toHaveBeenCalledWith('http://localhost:3001/api/usuarios/2');
+        expect(global.fetch).toHaveBeenCalledWith('https://revida.onrender.com/api/usuarios/2');
     });
 
     it('lanza error cuando el usuario no existe (404)', async () => {
@@ -71,7 +71,7 @@ describe('API Service — crearUsuario', () => {
 
         const result = await crearUsuario('Sofia');
         expect(result).toEqual(mockData);
-        expect(global.fetch).toHaveBeenCalledWith('http://localhost:3001/api/usuarios', {
+        expect(global.fetch).toHaveBeenCalledWith('https://revida.onrender.com/api/usuarios', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nombre: 'Sofia' }),
