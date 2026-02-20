@@ -1,9 +1,9 @@
 // ============================================================
 // Capa de servicios — Consumo de API REST del Backend REVIDA
-// Base URL: http://localhost:3000
+// Base URL: http://localhost:3001
 // ============================================================
 
-const API_URL = "http://localhost:3000";
+const API_URL = "http://localhost:3001";
 
 /**
  * GET /api/usuarios — Obtener todos los usuarios

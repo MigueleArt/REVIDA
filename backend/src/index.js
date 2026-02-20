@@ -1,6 +1,6 @@
 import http from "http";
 
-const PORT = 3000;
+const PORT = 3001;
 
 let usuarios = [
   { id: 1, nombre: "Alan" },
