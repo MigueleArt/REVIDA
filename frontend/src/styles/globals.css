@@ -1,18 +1,18 @@
 .navbar {
-  position: sticky; 
+  position: sticky;
   top: 0;
-  z-index: 1000;    
+  z-index: 1000;
   background-color: white;
   padding: 1rem 2rem;
   display: flex;
-  justify-content: space-between; 
+  justify-content: space-between;
   align-items: center;
-  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1); 
+  box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
 }
 
 .nav-links {
   display: flex;
-  gap: 2rem;       
+  gap: 2rem;
   list-style: none;
   margin: 0;
   padding: 0;
@@ -20,16 +20,16 @@
 
 .nav-link {
   text-decoration: none;
-  color: #334155; 
+  color: #334155;
   font-weight: 500;
 }
 
 .nav-link:hover {
-  color: #2563EB; 
+  color: #2563EB;
 }
 
 .center-screen {
-  min-height: 80vh; 
+  min-height: 80vh;
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -39,7 +39,7 @@
 }
 
 .title-blue {
-  color: #2563EB; 
+  color: #2563EB;
   font-size: 3rem;
   margin-bottom: 0.5rem;
 }
@@ -48,7 +48,7 @@
   background-color: #2563EB;
   color: white;
   padding: 10px 20px;
-  border-radius: 8px; 
+  border-radius: 8px;
   text-decoration: none;
   font-weight: bold;
   margin-top: 20px;
@@ -56,12 +56,20 @@
 }
 
 .btn-primary:hover {
+  background-color: #1d4ed8;
   background-color: #1d4ed8; 
 }
 
 /* ========== Accessible Loader ========== */
 
 @keyframes revida-spin {
+  0% {
+    transform: rotate(0deg);
+  }
+
+  100% {
+    transform: rotate(360deg);
+  }
   0%   { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }

@@ -5,6 +5,7 @@
  *
  * Props:
  *  - message  (string)  Texto visible debajo del spinner. Default: "Cargando..."
+ *  - icon     (string)  Icono contextual: "donaciones" | "perfil" | "buscar" | "usuarios" | "general"
  *  - icon     (string)  Icono contextual: "donaciones" | "perfil" | "buscar" | "general"
  *  - size     (string)  Tamaño del spinner: "sm" | "md" | "lg"
  */
@@ -15,6 +16,14 @@ const ICONS = {
             <path d="M20.84 4.61a5.5 5.5 0 00-7.78 0L12 5.67l-1.06-1.06a5.5 5.5 0 00-7.78 7.78l1.06 1.06L12 21.23l7.78-7.78 1.06-1.06a5.5 5.5 0 000-7.78z" />
         </svg>
     ),
+    usuarios: (
+        <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
+            <path d="M17 21v-2a4 4 0 00-4-4H5a4 4 0 00-4 4v2" />
+            <circle cx="9" cy="7" r="4" />
+            <path d="M23 21v-2a4 4 0 00-3-3.87M16 3.13a4 4 0 010 7.75" />
+        </svg>
+    ),
+
     perfil: (
         <svg width="28" height="28" viewBox="0 0 24 24" fill="none" stroke="#2563EB" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" aria-hidden="true">
             <path d="M20 21v-2a4 4 0 00-4-4H8a4 4 0 00-4 4v2" />
@@ -69,6 +78,9 @@ export default function AccessibleLoader({ message = 'Cargando...', icon = 'gene
                     focusable="false"
                     style={{ position: 'absolute', top: 0, left: 0 }}
                 >
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="#E5E7EB" strokeWidth="4" />
+                    <circle cx="25" cy="25" r="20" fill="none" stroke="#2563EB" strokeWidth="4"
+                        strokeLinecap="round" strokeDasharray="80, 200" strokeDashoffset="0" />
                     <circle
                         cx="25"
                         cy="25"
@@ -92,6 +104,13 @@ export default function AccessibleLoader({ message = 'Cargando...', icon = 'gene
             </div>
 
             {/* Icono contextual */}
+            <div style={{ opacity: 0.7 }}>{contextIcon}</div>
+
+            {/* Mensaje visible */}
+            <p style={{ color: '#6B7280', fontSize: s.fontSize, fontWeight: 500, margin: 0, textAlign: 'center' }}>
+                {message}
+            </p>
+            {/* Texto solo para lectores de pantalla */}
             <div style={{ opacity: 0.7 }}>
                 {contextIcon}
             </div>
@@ -108,7 +127,6 @@ export default function AccessibleLoader({ message = 'Cargando...', icon = 'gene
             >
                 {message}
             </p>
-
             {/* Texto solo para lectores de pantalla como fallback */}
             <span className="sr-only">{message}</span>
         </div>
