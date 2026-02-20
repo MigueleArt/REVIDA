@@ -7,7 +7,7 @@ const server = http.createServer((req, res) => {
   if (req.method === "GET" && req.url === "/") {
     res.writeHead(200);
     return res.end(JSON.stringify({
-      success: true,
+      status: "success",
       message: "Revida backend running"
     }));
   }
@@ -21,16 +21,29 @@ const server = http.createServer((req, res) => {
 
     res.writeHead(200);
     return res.end(JSON.stringify({
-      success: true,
+      status: "success",
       data: usuarios
     }));
   }
 
-  // Ruta no encontrada
+  // Simulación de error 500
+  if (req.method === "GET" && req.url === "/error-test") {
+    res.writeHead(500);
+    return res.end(JSON.stringify({
+      status: "error",
+      error: 500,
+      message: "Error interno en el servidor de REVIDA",
+      details: "No se pudo conectar con la base de datos.",
+      next_steps: "El equipo técnico ha sido notificado. Intenta más tarde."
+    }));
+  }
+
+  // 404
   res.writeHead(404);
   return res.end(JSON.stringify({
-    success: false,
-    message: "Ruta no encontrada"
+    status: "error",
+    error: 404,
+    message: "La ruta solicitada no existe en el sistema REVIDA"
   }));
 });
 
