@@ -1,9 +1,9 @@
 // ============================================================
 // Capa de servicios — Consumo de API REST del Backend REVIDA
-// Base URL: http://localhost:3001
+// Base URL: https://revida.onrender.com
 // ============================================================
 
-const API_URL = "http://localhost:3001";
+const API_URL = "https://revida.onrender.com";
 
 /**
  * GET /api/usuarios — Obtener todos los usuarios
