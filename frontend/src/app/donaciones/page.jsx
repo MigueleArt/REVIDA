@@ -5,4 +5,6 @@ export default function DonacionesPage() {
             <p>Listado de donaciones disponibles.</p>
         </div>
     );
+
 }
+
