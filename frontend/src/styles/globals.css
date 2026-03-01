@@ -1,3 +1,42 @@
+/* ========== Base Reset ========== */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+/* ========== Focus Visible — Accesibilidad de Teclado ========== */
+:focus-visible {
+  outline: 3px solid #2563EB;
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+/* ========== Skip to Content ========== */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 16px;
+  z-index: 9999;
+  padding: 12px 24px;
+  background-color: #2563EB;
+  color: white;
+  font-weight: 700;
+  font-size: 1rem;
+  border-radius: 0 0 8px 8px;
+  text-decoration: none;
+  transition: top 0.2s;
+}
+
+.skip-link:focus {
+  top: 0;
+}
+
+/* ========== Navbar ========== */
 .navbar {
   position: sticky;
   top: 0;
@@ -53,14 +92,14 @@
   font-weight: bold;
   margin-top: 20px;
   display: inline-block;
+  transition: background-color 0.2s;
 }
 
 .btn-primary:hover {
   background-color: #1d4ed8;
-  background-color: #1d4ed8; 
 }
 
-/* ========== Accessible Loader ========== */
+/* ========== Animaciones ========== */
 
 @keyframes revida-spin {
   0% {
@@ -70,21 +109,52 @@
   100% {
     transform: rotate(360deg);
   }
-  0%   { transform: rotate(0deg); }
-  100% { transform: rotate(360deg); }
+}
+
+@keyframes revida-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+@keyframes revida-pulse {
+
+  0%,
+  100% {
+    opacity: 1;
+  }
+
+  50% {
+    opacity: 0.4;
+  }
 }
 
 .revida-spinner {
   animation: revida-spin 1s linear infinite;
 }
 
+.revida-fade-in {
+  animation: revida-fade-in 0.3s ease-out both;
+}
+
+.revida-pulse {
+  animation: revida-pulse 1.5s ease-in-out infinite;
+}
+
+/* ========== Accessible Loader ========== */
 .revida-loader {
   background-color: white;
   border-radius: 16px;
   border: 2px dashed #E5E7EB;
 }
 
-/* Screen-reader only (visually hidden) */
+/* ========== Screen-reader only (visually hidden) ========== */
 .sr-only {
   position: absolute;
   width: 1px;
@@ -95,4 +165,39 @@
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
   border-width: 0;
+}
+
+/* ========== prefers-reduced-motion ========== */
+@media (prefers-reduced-motion: reduce) {
+  html {
+    scroll-behavior: auto;
+  }
+
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+
+  .skip-link {
+    transition: none;
+  }
+
+  .revida-spinner {
+    animation: none;
+  }
+
+  .revida-fade-in {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+
+  .revida-pulse {
+    animation: none;
+    opacity: 1;
+  }
 }

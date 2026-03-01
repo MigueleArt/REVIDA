@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import CardDonacion from '../../../components/CardDonacion';
 import AccessibleLoader from '../../../components/AccessibleLoader';
+import useReducedMotion from '../../../hooks/useReducedMotion';
 
 export default function MisDonativosPage() {
 
@@ -23,6 +24,7 @@ export default function MisDonativosPage() {
   const [feedback, setFeedback] = useState('');
 
   const searchInputRef = useRef(null);
+  const reducedMotion = useReducedMotion();
 
   const handleSearch = () => {
     setIsLoading(true);
@@ -91,7 +93,7 @@ export default function MisDonativosPage() {
             boxShadow: '0 2px 4px rgba(0,0,0,0.02)',
             flex: 1, // Ocupa el espacio disponible
             minWidth: '300px',
-            transition: 'box-shadow 0.2s, border-color 0.2s'
+            transition: reducedMotion ? 'none' : 'box-shadow 0.2s, border-color 0.2s'
           }}>
 
             {/* Sección INPUT */}
@@ -162,7 +164,7 @@ export default function MisDonativosPage() {
               fontSize: '1rem',
               cursor: 'pointer',
               boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)', // Sombra azulada suave
-              transition: 'background 0.2s',
+              transition: reducedMotion ? 'none' : 'background 0.2s',
               height: '54px' // Misma altura visual que la barra
             }}
             onMouseOver={(e) => e.target.style.backgroundColor = '#1d4ed8'}

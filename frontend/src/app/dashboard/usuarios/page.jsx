@@ -3,6 +3,7 @@
 import { useState, useEffect } from 'react';
 import { getUsuarios, crearUsuario } from '../../../services/api';
 import AccessibleLoader from '../../../components/AccessibleLoader';
+import useReducedMotion from '../../../hooks/useReducedMotion';
 
 export default function UsuariosPage() {
     // --- ESTADOS ---
@@ -12,6 +13,7 @@ export default function UsuariosPage() {
     const [nombre, setNombre] = useState('');
     const [isCreando, setIsCreando] = useState(false);
     const [feedback, setFeedback] = useState('');
+    const reducedMotion = useReducedMotion();
 
     // --- CARGAR USUARIOS AL MONTAR ---
     const cargarUsuarios = async () => {
@@ -107,7 +109,7 @@ export default function UsuariosPage() {
                             padding: '0 28px', fontWeight: '600', fontSize: '1rem',
                             cursor: isCreando ? 'wait' : 'pointer',
                             boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)',
-                            transition: 'background 0.2s', height: '54px',
+                            transition: reducedMotion ? 'none' : 'background 0.2s', height: '54px',
                             display: 'flex', alignItems: 'center', gap: '8px'
                         }}
                     >
@@ -169,7 +171,7 @@ export default function UsuariosPage() {
                             style={{
                                 backgroundColor: '#2563EB', color: 'white', border: 'none',
                                 borderRadius: '8px', padding: '10px 24px', fontWeight: '600',
-                                fontSize: '0.95rem', cursor: 'pointer', transition: 'background 0.2s'
+                                fontSize: '0.95rem', cursor: 'pointer', transition: reducedMotion ? 'none' : 'background 0.2s'
                             }}
                         >
                             Reintentar
@@ -188,7 +190,7 @@ export default function UsuariosPage() {
                                 border: '1px solid #E5E7EB',
                                 boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
                                 display: 'flex', alignItems: 'center', gap: '16px',
-                                transition: 'transform 0.2s, box-shadow 0.2s'
+                                transition: reducedMotion ? 'none' : 'transform 0.2s, box-shadow 0.2s'
                             }}>
                                 {/* Avatar */}
                                 <div style={{

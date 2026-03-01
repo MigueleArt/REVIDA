@@ -1,21 +1,23 @@
 'use client';
 
 import { useState, useRef } from 'react';
+import useReducedMotion from '../hooks/useReducedMotion';
 
 export default function SearchFilter({ onSearch }) {
   const [query, setQuery] = useState('');
   const [category, setCategory] = useState('todas');
-  const [isFocused, setIsFocused] = useState(false); 
+  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef(null);
+  const reducedMotion = useReducedMotion();
 
-  
+
   const handleKeyDown = (e) => {
     if (e.key === 'Enter') {
       handleSearch();
     }
     if (e.key === 'Escape') {
       setQuery('');
-      inputRef.current?.focus(); 
+      inputRef.current?.focus();
     }
   };
 
@@ -24,22 +26,22 @@ export default function SearchFilter({ onSearch }) {
   };
 
   return (
-    <div style={{ 
-      marginBottom: '2rem', 
-      padding: '20px', 
-      backgroundColor: 'white', 
+    <div style={{
+      marginBottom: '2rem',
+      padding: '20px',
+      backgroundColor: 'white',
       borderRadius: '12px',
       boxShadow: '0 2px 4px rgba(0,0,0,0.05)'
     }}>
-      <label 
-        htmlFor="search-input" 
+      <label
+        htmlFor="search-input"
         style={{ display: 'block', marginBottom: '8px', fontWeight: '600', color: '#374151' }}
       >
         Buscar donaciones
       </label>
-      
+
       <div style={{ display: 'flex', gap: '10px', flexWrap: 'wrap' }}>
-        
+
         <div style={{ flex: 1, position: 'relative' }}>
           <input
             ref={inputRef}
@@ -56,9 +58,9 @@ export default function SearchFilter({ onSearch }) {
               width: '100%',
               padding: '12px',
               borderRadius: '8px',
-              border: isFocused ? '2px solid #2563EB' : '1px solid #D1D5DB', 
+              border: isFocused ? '2px solid #2563EB' : '1px solid #D1D5DB',
               outline: 'none',
-              transition: 'border 0.2s',
+              transition: reducedMotion ? 'none' : 'border 0.2s',
               fontSize: '1rem'
             }}
           />
