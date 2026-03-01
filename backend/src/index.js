@@ -37,7 +37,7 @@ const server = http.createServer(async (req, res) => {
 
   // 3. Ruta para simular el ERROR 500 (Para pruebas de QA)
   if (method === "GET" && url === "/error-test") {
-    await delay(500); // Simulamos que tarda un poco antes de fallar
+    await delay(200); // Simulamos que tarda un poco antes de fallar
     return sendJson(res, 500, {
       success: false,
       error: 500,
@@ -48,7 +48,7 @@ const server = http.createServer(async (req, res) => {
 
   // 4. Ruta GET: Obtener usuarios (Funcionalidad real)
   if (method === "GET" && url === "/api/usuarios") {
-    await delay(1500); // Retardo de 1.5 segundos para ver los estados de carga
+    await delay(200); // Retardo de 1.5 segundos para ver los estados de carga
     return sendJson(res, 200, {
       success: true,
       data: usuarios
