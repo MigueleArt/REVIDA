@@ -3,6 +3,7 @@
 import { useState, useRef } from 'react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import useReducedMotion from '../../../hooks/useReducedMotion';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -11,6 +12,7 @@ export default function LoginPage() {
   const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState('');
   const [isLoading, setIsLoading] = useState(false);
+  const reducedMotion = useReducedMotion();
 
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
@@ -51,28 +53,28 @@ export default function LoginPage() {
   };
 
   return (
-    <div style={{ 
+    <div style={{
       fontFamily: 'system-ui, -apple-system, sans-serif',
-      minHeight: '100vh', 
-      display: 'flex', 
-      justifyContent: 'center', 
-      alignItems: 'center', 
-      backgroundColor: '#F3F4F6' 
+      minHeight: '100vh',
+      display: 'flex',
+      justifyContent: 'center',
+      alignItems: 'center',
+      backgroundColor: '#F3F4F6'
     }}>
-      
-      <div style={{ 
-        backgroundColor: 'white', 
-        padding: '40px', 
-        borderRadius: '12px', 
-        boxShadow: '0 4px 6px rgba(0,0,0,0.05)', 
-        width: '100%', 
+
+      <div style={{
+        backgroundColor: 'white',
+        padding: '40px',
+        borderRadius: '12px',
+        boxShadow: '0 4px 6px rgba(0,0,0,0.05)',
+        width: '100%',
         maxWidth: '400px',
         textAlign: 'center'
       }}>
-        
+
         <div style={{ marginBottom: '20px' }}>
           <svg width="48" height="48" viewBox="0 0 24 24" fill="#2563EB" style={{ margin: '0 auto' }}>
-            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z"/>
+            <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
           </svg>
         </div>
 
@@ -84,8 +86,8 @@ export default function LoginPage() {
         </p>
 
         {error && (
-          <div role="alert" style={{ 
-            backgroundColor: '#FEE2E2', color: '#B91C1C', 
+          <div role="alert" style={{
+            backgroundColor: '#FEE2E2', color: '#B91C1C',
             padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'left'
           }}>
             Ingrese sus datos correctamente: {error}
@@ -93,7 +95,7 @@ export default function LoginPage() {
         )}
 
         <form onSubmit={handleSubmit}>
-          
+
           <div style={{ marginBottom: '16px', textAlign: 'left' }}>
             <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.9rem', fontWeight: '500', color: '#374151' }}>
               Correo electrónico
@@ -142,21 +144,21 @@ export default function LoginPage() {
             </div>
           </div>
 
-          <button 
-            type="submit" 
+          <button
+            type="submit"
             disabled={isLoading}
             style={{
               width: '100%', backgroundColor: '#2563EB', color: 'white',
               padding: '12px', borderRadius: '8px', border: 'none',
-              fontSize: '1rem', fontWeight: '600', cursor: 'pointer', 
-              transition: 'background 0.2s', opacity: isLoading ? 0.7 : 1
+              fontSize: '1rem', fontWeight: '600', cursor: 'pointer',
+              transition: reducedMotion ? 'none' : 'background 0.2s', opacity: isLoading ? 0.7 : 1
             }}
           >
             {isLoading ? 'Cargando...' : 'Iniciar Sesión'}
           </button>
         </form>
 
-        
+
       </div>
     </div>
   );
