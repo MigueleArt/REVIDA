@@ -2,9 +2,11 @@
 
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
+import useReducedMotion from '../hooks/useReducedMotion';
 
 export default function Navbar() {
   const pathname = usePathname();
+  const reducedMotion = useReducedMotion();
 
   if (pathname.startsWith('/auth')) {
     return null;
@@ -22,7 +24,7 @@ export default function Navbar() {
       display: 'flex',
       alignItems: 'center',
       gap: '8px',
-      transition: 'all 0.2s',
+      transition: reducedMotion ? 'none' : 'all 0.2s',
       color: active ? '#2563EB' : '#6B7280',
       backgroundColor: active ? '#EFF6FF' : 'transparent',
     };
@@ -73,7 +75,7 @@ export default function Navbar() {
         </div>
 
         <div style={{ padding: '12px 0' }}>
-          <nav style={{ display: 'flex', gap: '10px' }}>
+          <nav aria-label="Navegación principal" style={{ display: 'flex', gap: '10px' }}>
 
             {/*  Donaciones  */}
             <Link href="/dashboard/mis-donativos" style={styles.activeLink}>
@@ -134,7 +136,7 @@ const linkBase = {
   display: 'flex',
   alignItems: 'center',
   gap: '8px',
-  transition: 'all 0.2s'
+  transition: 'none'
 };
 
 const styles = {

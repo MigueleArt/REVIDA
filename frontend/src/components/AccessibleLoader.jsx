@@ -7,7 +7,12 @@
  *  - message  (string)  Texto visible debajo del spinner. Default: "Cargando..."
  *  - icon     (string)  Icono contextual: "donaciones" | "perfil" | "buscar" | "usuarios" | "general"
  *  - size     (string)  Tamaño del spinner: "sm" | "md" | "lg"
+ *
+ * Cuando prefers-reduced-motion: reduce está activo, se reemplaza el spinner
+ * giratorio por un indicador pulsante estático accesible.
  */
+
+import useReducedMotion from '../hooks/useReducedMotion';
 
 const ICONS = {
     donaciones: (
@@ -50,6 +55,7 @@ const SIZES = {
 export default function AccessibleLoader({ message = 'Cargando...', icon = 'general', size = 'md' }) {
     const s = SIZES[size] || SIZES.md;
     const contextIcon = ICONS[icon] || ICONS.general;
+    const reducedMotion = useReducedMotion();
 
     return (
         <div
@@ -65,30 +71,53 @@ export default function AccessibleLoader({ message = 'Cargando...', icon = 'gene
                 padding: '60px 20px',
             }}
         >
-            {/* Spinner SVG animado */}
-            <div style={{ position: 'relative', width: s.spinner, height: s.spinner }}>
-                <svg
-                    className="revida-spinner"
-                    width={s.spinner}
-                    height={s.spinner}
-                    viewBox="0 0 50 50"
-                    aria-hidden="true"
-                    focusable="false"
-                    style={{ position: 'absolute', top: 0, left: 0 }}
-                >
-                    <circle cx="25" cy="25" r="20" fill="none" stroke="#E5E7EB" strokeWidth="4" />
-                    <circle cx="25" cy="25" r="20" fill="none" stroke="#2563EB" strokeWidth="4"
-                        strokeLinecap="round" strokeDasharray="80, 200" strokeDashoffset="0" />
-                </svg>
-            </div>
+            {reducedMotion ? (
+                /* Modo reducido: indicador estático con texto pulsante */
+                <div style={{
+                    display: 'flex',
+                    flexDirection: 'column',
+                    alignItems: 'center',
+                    gap: s.gap
+                }}>
+                    <div style={{ opacity: 0.7 }}>{contextIcon}</div>
+                    <p className="revida-pulse" style={{
+                        color: '#2563EB',
+                        fontSize: s.fontSize,
+                        fontWeight: 600,
+                        margin: 0,
+                        textAlign: 'center'
+                    }}>
+                        {message}
+                    </p>
+                </div>
+            ) : (
+                /* Modo normal: spinner animado */
+                <>
+                    <div style={{ position: 'relative', width: s.spinner, height: s.spinner }}>
+                        <svg
+                            className="revida-spinner"
+                            width={s.spinner}
+                            height={s.spinner}
+                            viewBox="0 0 50 50"
+                            aria-hidden="true"
+                            focusable="false"
+                            style={{ position: 'absolute', top: 0, left: 0 }}
+                        >
+                            <circle cx="25" cy="25" r="20" fill="none" stroke="#E5E7EB" strokeWidth="4" />
+                            <circle cx="25" cy="25" r="20" fill="none" stroke="#2563EB" strokeWidth="4"
+                                strokeLinecap="round" strokeDasharray="80, 200" strokeDashoffset="0" />
+                        </svg>
+                    </div>
 
-            {/* Icono contextual */}
-            <div style={{ opacity: 0.7 }}>{contextIcon}</div>
+                    {/* Icono contextual */}
+                    <div style={{ opacity: 0.7 }}>{contextIcon}</div>
 
-            {/* Mensaje visible */}
-            <p style={{ color: '#6B7280', fontSize: s.fontSize, fontWeight: 500, margin: 0, textAlign: 'center' }}>
-                {message}
-            </p>
+                    {/* Mensaje visible */}
+                    <p style={{ color: '#6B7280', fontSize: s.fontSize, fontWeight: 500, margin: 0, textAlign: 'center' }}>
+                        {message}
+                    </p>
+                </>
+            )}
 
             {/* Texto solo para lectores de pantalla */}
             <span className="sr-only">{message}</span>
