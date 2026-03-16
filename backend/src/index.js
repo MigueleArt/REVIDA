@@ -1,11 +1,17 @@
 import http from "http";
+import bcrypt from "bcrypt";
+import jwt from "jsonwebtoken";
 
+const SECRET_KEY = "revida_super_secreto"; // En producción esto iría en un archivo .env
 const PORT = 3001;
 
+// Encriptamos la contraseña "123456" para todos, simulando que así se guardó en la BD
+const hashTemporal = bcrypt.hashSync("123456", 10);
+
 let usuarios = [
-  { id: 1, nombre: "Alan" },
-  { id: 2, nombre: "Miguel" },
-  { id: 3, nombre: "Fatima" }
+  { id: 1, nombre: "Alan", email: "admin@revida.com", password: hashTemporal, rol: "Administrador" },
+  { id: 2, nombre: "Miguel", email: "org@revida.com", password: hashTemporal, rol: "Organizacion" },
+  { id: 3, nombre: "Fatima", email: "donador@revida.com", password: hashTemporal, rol: "Donador" }
 ];
 
 // Helper para responder en JSON con CORS (Permite que el Frontend se conecte)
@@ -19,95 +25,114 @@ function sendJson(res, statusCode, data) {
   res.end(JSON.stringify(data));
 }
 
-// Función para simular lentitud en la red (Para que QA pruebe los Loaders)
+// Función para simular lentitud en la red
 const delay = (ms) => new Promise(resolve => setTimeout(resolve, ms));
 
 const server = http.createServer(async (req, res) => {
   const { method, url } = req;
 
-  // 1. Manejo de CORS (Obligatorio para navegadores modernos)
+  // Manejo de CORS (Obligatorio para navegadores modernos)
   if (method === "OPTIONS") {
     return sendJson(res, 204, {});
   }
 
-  // 2. Ruta principal (Para comprobar que el servidor vive)
+  // Ruta principal
   if (method === "GET" && url === "/") {
     return sendJson(res, 200, { message: "Revida Backend Activo" });
   }
 
-  // 3. Ruta para simular el ERROR 500 (Para pruebas de QA)
+  // Ruta para simular el ERROR 500
   if (method === "GET" && url === "/error-test") {
-    await delay(200); // Simulamos que tarda un poco antes de fallar
-    return sendJson(res, 500, {
-      success: false,
-      error: 500,
-      message: "Error interno del servidor",
-      details: "Fallo de conexión simulado para pruebas de QA"
-    });
+    await delay(200);
+    return sendJson(res, 500, { success: false, message: "Error interno del servidor" });
   }
 
-  // 4. Ruta GET: Obtener usuarios (Funcionalidad real)
+  // Ruta GET: Obtener usuarios
   if (method === "GET" && url === "/api/usuarios") {
-    await delay(200); // Retardo de 1.5 segundos para ver los estados de carga
-    return sendJson(res, 200, {
-      success: true,
-      data: usuarios
-    });
+    await delay(200); 
+    return sendJson(res, 200, { success: true, data: usuarios });
   }
 
-  // 5. Ruta GET: Obtener un solo usuario (Manejo de Error 404 específico)
+  // Ruta GET: Obtener un solo usuario
   if (method === "GET" && url.startsWith("/api/usuarios/")) {
     const id = parseInt(url.split("/")[3]);
     const usuario = usuarios.find(u => u.id === id);
 
     if (!usuario) {
-      return sendJson(res, 404, {
-        success: false,
-        error: 404,
-        message: `El usuario con ID ${id} no existe en la base de datos`
-      });
+      return sendJson(res, 404, { success: false, message: `El usuario no existe` });
     }
-
     return sendJson(res, 200, { success: true, data: usuario });
   }
 
-  // 6. Ruta POST: Crear usuario (Manejo de Error 400)
+  // Ruta POST: Crear usuario
   if (method === "POST" && url === "/api/usuarios") {
     let body = "";
     req.on("data", chunk => body += chunk);
     req.on("end", () => {
       try {
         const data = JSON.parse(body);
-
         if (!data.nombre) {
-          return sendJson(res, 400, {
-            success: false,
-            error: 400,
-            message: "El campo 'nombre' es obligatorio para registrar un usuario"
-          });
+          return sendJson(res, 400, { success: false, message: "Falta el nombre" });
         }
-
         const nuevoUsuario = { id: usuarios.length + 1, nombre: data.nombre };
         usuarios.push(nuevoUsuario);
         return sendJson(res, 201, { success: true, data: nuevoUsuario });
-
       } catch (err) {
-        return sendJson(res, 400, {
-          success: false,
-          error: 400,
-          message: "El formato JSON enviado es inválido"
-        });
+        return sendJson(res, 400, { success: false, message: "JSON inválido" });
       }
     });
     return;
   }
 
-  // 7. Ruta no encontrada (Cualquier URL inventada cae aquí)
-  return sendJson(res, 404, {
-    success: false,
-    error: 404,
-    message: `La ruta solicitada (${url}) no existe en el sistema REVIDA`
-  });
+  
+  //NUEVA RUTA: Endpoint de Login Seguro con JWT y bcrypt
+  if (method === "POST" && url === "/api/login") {
+    let body = "";
+    req.on("data", chunk => body += chunk);
+    req.on("end", async () => {
+      try {
+        const { email, password } = JSON.parse(body);
+
+        // Buscar al usuario por correo
+        const usuario = usuarios.find(u => u.email === email);
+        if (!usuario) {
+          return sendJson(res, 401, { success: false, message: "Correo o contraseña incorrectos" });
+        }
+
+        // Comparar la contraseña enviada con la encriptada
+        const passwordValida = await bcrypt.compare(password, usuario.password);
+        if (!passwordValida) {
+          return sendJson(res, 401, { success: false, message: "Correo o contraseña incorrectos" });
+        }
+
+        // Generar el Token JWT con el Rol del usuario
+        const token = jwt.sign(
+          { id: usuario.id, rol: usuario.rol },
+          SECRET_KEY,
+          { expiresIn: "2h" }
+        );
+
+        // Enviar respuesta con Cookie HttpOnly
+        res.writeHead(200, {
+          "Content-Type": "application/json",
+          "Set-Cookie": `token=${token}; HttpOnly; Path=/; Max-Age=7200; SameSite=Strict`,
+          "Access-Control-Allow-Origin": "*",
+        });
+        res.end(JSON.stringify({
+          success: true,
+          message: "Login exitoso",
+          datos: { nombre: usuario.nombre, rol: usuario.rol }
+        }));
+
+      } catch (err) {
+        return sendJson(res, 400, { success: false, message: "Error al procesar el login" });
+      }
+    });
+    return;
+  }
+
+  // Ruta no encontrada
+  return sendJson(res, 404, { success: false, message: `La ruta solicitada (${url}) no existe` });
 });
 
 server.listen(PORT, () => {
