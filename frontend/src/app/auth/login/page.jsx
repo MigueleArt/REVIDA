@@ -1,8 +1,8 @@
 'use client';
 
 import { useState, useRef } from 'react';
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import { loginUsuario } from '../../../services/api';
 import useReducedMotion from '../../../hooks/useReducedMotion';
 
 export default function LoginPage() {
@@ -10,46 +10,72 @@ export default function LoginPage() {
 
   const [formData, setFormData] = useState({ email: '', password: '' });
   const [showPassword, setShowPassword] = useState(false);
-  const [error, setError] = useState('');
+  const [errors, setErrors] = useState({ email: '', password: '', general: '' });
   const [isLoading, setIsLoading] = useState(false);
   const reducedMotion = useReducedMotion();
 
   const emailRef = useRef(null);
   const passwordRef = useRef(null);
 
+  const hasEmailError = !!errors.email;
+  const hasPasswordError = !!errors.password;
+  const hasGeneralError = !!errors.general;
+
   const handleChange = (e) => {
     setFormData({ ...formData, [e.target.name]: e.target.value });
-    if (error) setError('');
+    // Limpiar error del campo al escribir
+    if (errors[e.target.name] || errors.general) {
+      setErrors({ ...errors, [e.target.name]: '', general: '' });
+    }
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
-    setError('');
+    setErrors({ email: '', password: '', general: '' });
+
+    // --- Validación en cliente ---
+    const newErrors = { email: '', password: '', general: '' };
+    let hasValidationError = false;
 
     if (!formData.email || !formData.email.includes('@')) {
-      setError('Correo inválido');
-      setIsLoading(false);
-      emailRef.current?.focus();
-      return;
+      newErrors.email = 'Ingrese un correo electrónico válido.';
+      hasValidationError = true;
     }
 
     if (!formData.password) {
-      setError('Falta la contraseña');
+      newErrors.password = 'Ingrese su contraseña.';
+      hasValidationError = true;
+    }
+
+    if (hasValidationError) {
+      setErrors(newErrors);
       setIsLoading(false);
-      passwordRef.current?.focus();
+      // Enfocar el primer campo con error
+      if (newErrors.email) {
+        emailRef.current?.focus();
+      } else if (newErrors.password) {
+        passwordRef.current?.focus();
+      }
       return;
     }
 
-    setTimeout(() => {
-      if (formData.email === 'test@revida.com' && formData.password === '123456') {
-        router.push('/');
+    // --- Llamar al API de login ---
+    try {
+      const result = await loginUsuario(formData.email, formData.password);
+
+      // Redirigir según rol
+      if (result.rol === 'admin') {
+        router.push('/dashboard/usuarios');
       } else {
-        setError('Credenciales incorrectas');
-        setIsLoading(false);
-        passwordRef.current?.focus();
+        router.push('/dashboard/mis-donativos');
       }
-    }, 1000);
+    } catch (err) {
+      // Mensaje genérico y seguro — no revela cuál campo falló
+      setErrors({ email: '', password: '', general: err.message });
+      setIsLoading(false);
+      passwordRef.current?.focus();
+    }
   };
 
   return (
@@ -73,67 +99,110 @@ export default function LoginPage() {
       }}>
 
         <div style={{ marginBottom: '20px' }}>
-          <svg width="48" height="48" viewBox="0 0 24 24" fill="#2563EB" style={{ margin: '0 auto' }}>
+          <svg width="48" height="48" viewBox="0 0 24 24" fill="#2563EB" style={{ margin: '0 auto' }} aria-hidden="true">
             <path d="M12 21.35l-1.45-1.32C5.4 15.36 2 12.28 2 8.5 2 5.42 4.42 3 7.5 3c1.74 0 3.41.81 4.5 2.09C13.09 3.81 14.76 3 16.5 3 19.58 3 22 5.42 22 8.5c0 3.78-3.4 6.86-8.55 11.54L12 21.35z" />
           </svg>
         </div>
 
-        <h2 style={{ color: '#111827', margin: '0 0 8px 0', fontSize: '1.5rem', fontWeight: 'bold' }}>
+        <h1 style={{ color: '#111827', margin: '0 0 8px 0', fontSize: '1.5rem', fontWeight: 'bold' }}>
           Bienvenido a Revida
-        </h2>
+        </h1>
         <p style={{ color: '#6B7280', margin: '0 0 24px 0', fontSize: '0.95rem' }}>
           Inicia sesión para continuar
         </p>
 
-        {error && (
-          <div role="alert" style={{
-            backgroundColor: '#FEE2E2', color: '#B91C1C',
-            padding: '12px', borderRadius: '8px', marginBottom: '20px', fontSize: '0.9rem', textAlign: 'left'
-          }}>
-            Ingrese sus datos correctamente: {error}
-          </div>
-        )}
+        {/* Contenedor de error general — accesible con aria-live */}
+        <div
+          id="login-error"
+          role="alert"
+          aria-live="assertive"
+          aria-atomic="true"
+          style={{
+            backgroundColor: hasGeneralError ? '#FEE2E2' : 'transparent',
+            color: '#B91C1C',
+            padding: hasGeneralError ? '12px' : '0',
+            borderRadius: '8px',
+            marginBottom: hasGeneralError ? '20px' : '0',
+            fontSize: '0.9rem',
+            textAlign: 'left',
+            minHeight: hasGeneralError ? 'auto' : '0',
+          }}
+        >
+          {hasGeneralError && errors.general}
+        </div>
 
-        <form onSubmit={handleSubmit}>
+        <form onSubmit={handleSubmit} noValidate>
 
+          {/* Campo Correo electrónico */}
           <div style={{ marginBottom: '16px', textAlign: 'left' }}>
-            <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.9rem', fontWeight: '500', color: '#374151' }}>
+            <label
+              htmlFor="login-email"
+              style={{ display: 'block', marginBottom: '6px', fontSize: '0.9rem', fontWeight: '500', color: '#374151' }}
+            >
               Correo electrónico
             </label>
             <input
               ref={emailRef}
+              id="login-email"
               name="email"
               type="email"
+              autoComplete="email"
+              required
               value={formData.email}
               onChange={handleChange}
-              placeholder="test@revida.com"
+              placeholder="correo@ejemplo.com"
+              aria-invalid={hasEmailError}
+              aria-describedby={hasEmailError ? 'email-error' : undefined}
               style={{
                 width: '100%', padding: '10px 12px', borderRadius: '8px',
-                border: '1px solid #D1D5DB', fontSize: '1rem', outline: 'none'
+                border: `1px solid ${hasEmailError ? '#EF4444' : '#D1D5DB'}`,
+                fontSize: '1rem', outline: 'none',
+                boxSizing: 'border-box'
               }}
             />
+            {hasEmailError && (
+              <p
+                id="email-error"
+                role="alert"
+                style={{ color: '#EF4444', fontSize: '0.85rem', margin: '6px 0 0 0' }}
+              >
+                {errors.email}
+              </p>
+            )}
           </div>
 
+          {/* Campo Contraseña */}
           <div style={{ marginBottom: '24px', textAlign: 'left' }}>
-            <label style={{ display: 'block', marginBottom: '6px', fontSize: '0.9rem', fontWeight: '500', color: '#374151' }}>
+            <label
+              htmlFor="login-password"
+              style={{ display: 'block', marginBottom: '6px', fontSize: '0.9rem', fontWeight: '500', color: '#374151' }}
+            >
               Contraseña
             </label>
             <div style={{ position: 'relative' }}>
               <input
                 ref={passwordRef}
+                id="login-password"
                 name="password"
                 type={showPassword ? "text" : "password"}
+                autoComplete="current-password"
+                required
                 value={formData.password}
                 onChange={handleChange}
-                placeholder="123456"
+                placeholder="••••••"
+                aria-invalid={hasPasswordError}
+                aria-describedby={hasPasswordError ? 'password-error' : hasGeneralError ? 'login-error' : undefined}
                 style={{
                   width: '100%', padding: '10px 12px', borderRadius: '8px',
-                  border: '1px solid #D1D5DB', fontSize: '1rem', outline: 'none'
+                  border: `1px solid ${hasPasswordError ? '#EF4444' : '#D1D5DB'}`,
+                  fontSize: '1rem', outline: 'none',
+                  boxSizing: 'border-box'
                 }}
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
+                aria-label={showPassword ? 'Ocultar contraseña' : 'Mostrar contraseña'}
                 style={{
                   position: 'absolute', right: '12px', top: '50%', transform: 'translateY(-50%)',
                   background: 'none', border: 'none', color: '#6B7280', cursor: 'pointer', fontSize: '0.85rem'
@@ -142,22 +211,31 @@ export default function LoginPage() {
                 {showPassword ? "Ocultar" : "Mostrar"}
               </button>
             </div>
+            {hasPasswordError && (
+              <p
+                id="password-error"
+                role="alert"
+                style={{ color: '#EF4444', fontSize: '0.85rem', margin: '6px 0 0 0' }}
+              >
+                {errors.password}
+              </p>
+            )}
           </div>
 
+          {/* Botón de enviar */}
           <button
             type="submit"
             disabled={isLoading}
             style={{
               width: '100%', backgroundColor: '#2563EB', color: 'white',
               padding: '12px', borderRadius: '8px', border: 'none',
-              fontSize: '1rem', fontWeight: '600', cursor: 'pointer',
+              fontSize: '1rem', fontWeight: '600', cursor: isLoading ? 'not-allowed' : 'pointer',
               transition: reducedMotion ? 'none' : 'background 0.2s', opacity: isLoading ? 0.7 : 1
             }}
           >
             {isLoading ? 'Cargando...' : 'Iniciar Sesión'}
           </button>
         </form>
-
 
       </div>
     </div>
