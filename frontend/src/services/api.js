@@ -1,14 +1,10 @@
 // ============================================================
 // Capa de servicios — Consumo de API REST del Backend REVIDA
-// Base URL: https://revida.onrender.com
 // ============================================================
 
 const API_URL = "https://revida.onrender.com";
 
-/**
- * GET /api/usuarios — Obtener todos los usuarios
- * @returns {{ success: boolean, data: Array<{id: number, nombre: string}> }}
- */
+/** Obtener todos los usuarios  */
 export async function getUsuarios() {
     try {
         const res = await fetch(`${API_URL}/api/usuarios`);
@@ -25,11 +21,7 @@ export async function getUsuarios() {
     }
 }
 
-/**
- * GET /api/usuarios/:id — Obtener un usuario por ID
- * @param {number} id
- * @returns {{ success: boolean, data: {id: number, nombre: string} }}
- */
+/** Obtener un usuario por ID */
 export async function getUsuario(id) {
     try {
         const res = await fetch(`${API_URL}/api/usuarios/${id}`);
@@ -39,18 +31,11 @@ export async function getUsuario(id) {
         }
         return await res.json();
     } catch (err) {
-        if (err.name === "TypeError" && err.message.includes("fetch")) {
-            throw new Error("No se pudo conectar con el servidor. ¿Está encendido el backend?");
-        }
         throw err;
     }
 }
 
-/**
- * POST /api/usuarios — Crear un nuevo usuario
- * @param {string} nombre
- * @returns {{ success: boolean, data: {id: number, nombre: string} }}
- */
+/** Crear un nuevo usuario */
 export async function crearUsuario(nombre) {
     try {
         const res = await fetch(`${API_URL}/api/usuarios`, {
@@ -64,86 +49,61 @@ export async function crearUsuario(nombre) {
         }
         return await res.json();
     } catch (err) {
-        if (err.name === "TypeError" && err.message.includes("fetch")) {
-            throw new Error("No se pudo conectar con el servidor. ¿Está encendido el backend?");
-        }
         throw err;
     }
 }
 
 // ============================================================
-// Autenticación — Login y manejo de sesión
+// Autenticación — Manejo de sesión con SECURE COOKIES
 // ============================================================
 
-// --- MOCK TEMPORAL (eliminar cuando el backend implemente POST /api/auth/login) ---
 const MOCK_USERS = [
     { email: "admin@revida.com", password: "admin123", nombre: "Admin Revida", rol: "admin" },
     { email: "donador@revida.com", password: "donador123", nombre: "Donador Demo", rol: "donador" },
 ];
 
-function mockLogin(email, password) {
-    const user = MOCK_USERS.find(
-        (u) => u.email === email && u.password === password
-    );
-    if (!user) return null;
-    return {
-        token: "mock-jwt-" + Date.now(),
-        nombre: user.nombre,
-        rol: user.rol,
-    };
-}
-// --- FIN MOCK ---
-
-/**
- * POST /api/auth/login — Iniciar sesión
- * @param {string} email
- * @param {string} password
- * @returns {{ token: string, nombre: string, rol: string }}
- */
+/** Iniciar sesión */
 export async function loginUsuario(email, password) {
-    // --- MOCK: reemplazar este bloque por el fetch real ---
-    const mockResult = mockLogin(email, password);
-    if (mockResult) {
-        guardarSesion(mockResult);
-        return mockResult;
+    const user = MOCK_USERS.find(u => u.email === email && u.password === password);
+    if (user) {
+        const userData = {
+            token: "mock-jwt-" + Date.now(),
+            nombre: user.nombre,
+            rol: user.rol,
+        };
+        guardarSesion(userData);
+        return userData;
     }
     throw new Error("Credenciales incorrectas. Verifique su correo y contraseña.");
-    // --- FIN MOCK ---
-
-    // --- CÓDIGO REAL (descomentar cuando el backend esté listo) ---
-    // try {
-    //     const res = await fetch(`${API_URL}/api/auth/login`, {
-    //         method: "POST",
-    //         headers: { "Content-Type": "application/json" },
-    //         body: JSON.stringify({ email, password }),
-    //     });
-    //     if (!res.ok) {
-    //         throw new Error("Credenciales incorrectas. Verifique su correo y contraseña.");
-    //     }
-    //     const data = await res.json();
-    //     guardarSesion(data);
-    //     return data;
-    // } catch (err) {
-    //     if (err.name === "TypeError" && err.message.includes("fetch")) {
-    //         throw new Error("No se pudo conectar con el servidor.");
-    //     }
-    //     throw err;
-    // }
 }
 
-/** Guardar sesión en localStorage */
+/** Guardar sesión: Token en Cookie Segura, Usuario en LocalStorage */
 function guardarSesion({ token, nombre, rol }) {
-    localStorage.setItem("revida_token", token);
+    if (typeof window === "undefined") return;
+
+    // 1. Guardar TOKEN en Secure Cookie (Requisito de la actividad)
+    document.cookie = `revida_token=${token}; path=/; max-age=86400; SameSite=Strict; Secure`;
+
+    // 2. Guardar USUARIO en LocalStorage (Para que useAuth lo detecte y sincronice)
     localStorage.setItem("revida_usuario", JSON.stringify({ nombre, rol }));
+    
+    // Disparar evento para que otras pestañas se enteren
+    window.dispatchEvent(new Event('storage'));
 }
 
-/** Obtener token de sesión */
+/** Obtener token de la Cookie */
 export function getToken() {
     if (typeof window === "undefined") return null;
-    return localStorage.getItem("revida_token");
+    const name = "revida_token=";
+    const ca = document.cookie.split(';');
+    for(let i = 0; i < ca.length; i++) {
+        let c = ca[i].trim();
+        if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
+    }
+    return null;
 }
 
-/** Obtener datos del usuario con sesión activa */
+/** Obtener datos del usuario */
 export function getUsuarioSesion() {
     if (typeof window === "undefined") return null;
     const data = localStorage.getItem("revida_usuario");
@@ -157,6 +117,14 @@ export function getUsuarioSesion() {
 
 /** Cerrar sesión */
 export function logout() {
-    localStorage.removeItem("revida_token");
+    if (typeof window === "undefined") return;
+    
+    // Borrar Cookie
+    document.cookie = "revida_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Strict; Secure";
+    
+    // Borrar LocalStorage
     localStorage.removeItem("revida_usuario");
+
+    // Sincronizar cierre en otras pestañas
+    window.dispatchEvent(new Event('storage'));
 }
