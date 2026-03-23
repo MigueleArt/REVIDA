@@ -29,34 +29,23 @@ export default function LoginPage() {
     }
   };
 
-  const handleSubmit = async (e) => {
+const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
     setErrors({ email: '', password: '', general: '' });
 
     // --- Validación en cliente ---
     const newErrors = { email: '', password: '', general: '' };
-    let hasValidationError = false;
-
     if (!formData.email || !formData.email.includes('@')) {
       newErrors.email = 'Ingrese un correo electrónico válido.';
-      hasValidationError = true;
     }
-
     if (!formData.password) {
       newErrors.password = 'Ingrese su contraseña.';
-      hasValidationError = true;
     }
 
-    if (hasValidationError) {
+    if (newErrors.email || newErrors.password) {
       setErrors(newErrors);
       setIsLoading(false);
-      // Enfocar el primer campo con error
-      if (newErrors.email) {
-        emailRef.current?.focus();
-      } else if (newErrors.password) {
-        passwordRef.current?.focus();
-      }
       return;
     }
 
@@ -71,10 +60,22 @@ export default function LoginPage() {
         router.push('/dashboard/mis-donativos');
       }
     } catch (err) {
-      // Mensaje genérico y seguro — no revela cuál campo falló
-      setErrors({ email: '', password: '', general: err.message });
-      setIsLoading(false);
+      // Soporte para múltiples sesiones y errores seguros
+      let mensajeError = 'Credenciales incorrectas o problema de conexión.';
+      
+      // Si el servidor envía un código específico para sesiones múltiples
+      if (err.message.includes('sesión activa') || err.status === 409) {
+        mensajeError = 'Ya hay una sesión activa en otro dispositivo. Por favor, cierra la anterior.';
+      } else if (err.status === 500) {
+        mensajeError = 'Error en el servidor. Inténtelo más tarde.'; // No mostramos el error técnico
+      }
+
+      setErrors({ ...errors, general: mensajeError });
       passwordRef.current?.focus();
+    } finally {
+      // ESTO HACE QUE EL LOGIN SEA FLUIDO:
+      // El botón se desbloquea SIEMPRE, ya sea que salga bien o mal.
+      setIsLoading(false); 
     }
   };
 
