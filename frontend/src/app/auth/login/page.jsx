@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { loginUsuario } from '../../../services/api';
 import useReducedMotion from '../../../hooks/useReducedMotion';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -222,6 +223,24 @@ const handleSubmit = async (e) => {
               </p>
             )}
           </div>
+          {/* 1. Asegúrate de que este import esté arriba del todo en el archivo */}
+
+
+
+<div style={{ textAlign: 'right', marginBottom: '20px' }}>
+  <Link 
+    href="/auth/forgot-password" 
+    style={{ 
+      color: '#2563EB', 
+      fontSize: '0.85rem', 
+      textDecoration: 'none',
+      fontWeight: '500' 
+    }}
+    aria-label="¿Olvidaste tu contraseña? Haz clic aquí para iniciar el proceso de recuperación"
+  >
+    ¿Olvidaste tu contraseña?
+  </Link>
+</div>
 
           {/* Botón de enviar */}
           <button

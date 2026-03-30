@@ -1,97 +1,58 @@
 // ============================================================
-// Capa de servicios — Consumo de API REST del Backend REVIDA
+// Capa de servicios — CONEXIÓN REAL BACKEND REVIDA (RENDER)
 // ============================================================
 
 const API_URL = "https://revida.onrender.com";
 
-/** Obtener todos los usuarios  */
-export async function getUsuarios() {
-    try {
-        const res = await fetch(`${API_URL}/api/usuarios`);
-        if (!res.ok) {
-            const error = await res.json().catch(() => ({}));
-            throw new Error(error.message || `Error ${res.status} al obtener usuarios`);
-        }
-        return await res.json();
-    } catch (err) {
-        if (err.name === "TypeError" && err.message.includes("fetch")) {
-            throw new Error("No se pudo conectar con el servidor. ¿Está encendido el backend?");
-        }
-        throw err;
+/** 1. RECUPERAR CONTRASEÑA (Tu tarea) */
+export async function solicitarRecuperacion(email) {
+    if (!email || !email.includes('@')) {
+        throw new Error("Por favor, ingresa un correo electrónico válido.");
     }
+    const res = await fetch(`${API_URL}/api/recuperar-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Error al procesar la solicitud.");
+    return data;
 }
 
-/** Obtener un usuario por ID */
-export async function getUsuario(id) {
-    try {
-        const res = await fetch(`${API_URL}/api/usuarios/${id}`);
-        if (!res.ok) {
-            const error = await res.json().catch(() => ({}));
-            throw new Error(error.message || `Error ${res.status} al buscar usuario`);
-        }
-        return await res.json();
-    } catch (err) {
-        throw err;
-    }
-}
-
-/** Crear un nuevo usuario */
-export async function crearUsuario(nombre) {
-    try {
-        const res = await fetch(`${API_URL}/api/usuarios`, {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ nombre }),
-        });
-        if (!res.ok) {
-            const error = await res.json().catch(() => ({}));
-            throw new Error(error.message || `Error ${res.status} al crear usuario`);
-        }
-        return await res.json();
-    } catch (err) {
-        throw err;
-    }
-}
-
-// ============================================================
-// Autenticación — Manejo de sesión con SECURE COOKIES
-// ============================================================
-
-const MOCK_USERS = [
-    { email: "admin@revida.com", password: "admin123", nombre: "Admin Revida", rol: "admin" },
-    { email: "donador@revida.com", password: "donador123", nombre: "Donador Demo", rol: "donador" },
-];
-
-/** Iniciar sesión */
+/** 2. LOGIN REAL */
 export async function loginUsuario(email, password) {
-    const user = MOCK_USERS.find(u => u.email === email && u.password === password);
-    if (user) {
-        const userData = {
-            token: "mock-jwt-" + Date.now(),
-            nombre: user.nombre,
-            rol: user.rol,
-        };
-        guardarSesion(userData);
-        return userData;
+    const res = await fetch(`${API_URL}/api/login`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email, password }),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Credenciales incorrectas.");
+    if (data.success) {
+        // Guardamos el usuario que viene del backend real
+        localStorage.setItem("revida_usuario", JSON.stringify(data.datos));
+        window.dispatchEvent(new Event('storage'));
     }
-    throw new Error("Credenciales incorrectas. Verifique su correo y contraseña.");
+    return data;
 }
 
-/** Guardar sesión: Token en Cookie Segura, Usuario en LocalStorage */
-function guardarSesion({ token, nombre, rol }) {
+/** 3. LOGOUT REAL (Arregla el error de la imagen 5f1b65) */
+export async function logout() {
     if (typeof window === "undefined") return;
-
-    // 1. Guardar TOKEN en Secure Cookie (Requisito de la actividad)
-    document.cookie = `revida_token=${token}; path=/; max-age=86400; SameSite=Strict; Secure`;
-
-    // 2. Guardar USUARIO en LocalStorage (Para que useAuth lo detecte y sincronice)
-    localStorage.setItem("revida_usuario", JSON.stringify({ nombre, rol }));
     
-    // Disparar evento para que otras pestañas se enteren
+    // Limpiamos los datos locales
+    localStorage.removeItem("revida_usuario");
+    // Borramos la cookie del token
+    document.cookie = "revida_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Strict; Secure";
+    
+    // Avisamos al sistema del cambio
     window.dispatchEvent(new Event('storage'));
+    
+    // Redirigimos al login
+    window.location.href = '/auth/login';
 }
 
-/** Obtener token de la Cookie */
+/** 4. FUNCIONES DE APOYO (Para useAuth y Navbar) */
 export function getToken() {
     if (typeof window === "undefined") return null;
     const name = "revida_token=";
@@ -103,28 +64,9 @@ export function getToken() {
     return null;
 }
 
-/** Obtener datos del usuario */
 export function getUsuarioSesion() {
     if (typeof window === "undefined") return null;
     const data = localStorage.getItem("revida_usuario");
     if (!data) return null;
-    try {
-        return JSON.parse(data);
-    } catch {
-        return null;
-    }
-}
-
-/** Cerrar sesión */
-export function logout() {
-    if (typeof window === "undefined") return;
-    
-    // Borrar Cookie
-    document.cookie = "revida_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Strict; Secure";
-    
-    // Borrar LocalStorage
-    localStorage.removeItem("revida_usuario");
-
-    // Sincronizar cierre en otras pestañas
-    window.dispatchEvent(new Event('storage'));
+    try { return JSON.parse(data); } catch { return null; }
 }
