@@ -74,8 +74,7 @@ const handleSubmit = async (e) => {
       setErrors({ ...errors, general: mensajeError });
       passwordRef.current?.focus();
     } finally {
-      // ESTO HACE QUE EL LOGIN SEA FLUIDO:
-      // El botón se desbloquea SIEMPRE, ya sea que salga bien o mal.
+      
       setIsLoading(false); 
     }
   };
@@ -223,7 +222,7 @@ const handleSubmit = async (e) => {
               </p>
             )}
           </div>
-          {/* 1. Asegúrate de que este import esté arriba del todo en el archivo */}
+          {}
 
 
 

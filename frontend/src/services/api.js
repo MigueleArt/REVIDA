@@ -4,7 +4,7 @@
 
 const API_URL = "https://revida.onrender.com";
 
-/** 1. RECUPERAR CONTRASEÑA (Tu tarea) */
+/** 1. RECUPERAR CONTRASEÑA  */
 export async function solicitarRecuperacion(email) {
     if (!email || !email.includes('@')) {
         throw new Error("Por favor, ingresa un correo electrónico válido.");
@@ -36,7 +36,7 @@ export async function loginUsuario(email, password) {
     return data;
 }
 
-/** 3. LOGOUT REAL (Arregla el error de la imagen 5f1b65) */
+/** 3. LOGOUT REAL */
 export async function logout() {
     if (typeof window === "undefined") return;
     

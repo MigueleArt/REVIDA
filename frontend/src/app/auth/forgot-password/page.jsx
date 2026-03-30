@@ -1,7 +1,7 @@
 'use client';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
-// 1. Importamos la conexión real que creamos antes
+
 import { solicitarRecuperacion } from '../../../services/api';
 
 export default function ForgotPassword() {
