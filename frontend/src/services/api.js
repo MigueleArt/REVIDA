@@ -1,8 +1,9 @@
 // ============================================================
-// Capa de servicios — CONEXIÓN REAL BACKEND REVIDA (RENDER)
+// Capa de servicios — CONEXIÓN REAL BACKEND REVIDA
 // ============================================================
 
-const API_URL = "https://revida.onrender.com";
+// Por defecto usamos el backend local, o el de una variable de entorno en producción
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
 
 /** 1. RECUPERAR CONTRASEÑA  */
 export async function solicitarRecuperacion(email) {
@@ -12,6 +13,7 @@ export async function solicitarRecuperacion(email) {
     const res = await fetch(`${API_URL}/api/recuperar-password`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email }),
     });
     const data = await res.json();
@@ -24,6 +26,7 @@ export async function loginUsuario(email, password) {
     const res = await fetch(`${API_URL}/api/login`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ email, password }),
     });
     const data = await res.json();
@@ -40,9 +43,19 @@ export async function loginUsuario(email, password) {
 export async function logout() {
     if (typeof window === "undefined") return;
     
+    try {
+        await fetch(`${API_URL}/api/logout`, {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include", // Importante para enviar la cookie
+        });
+    } catch (e) {
+        console.error("Error al hacer logout en el backend:", e);
+    }
+
     // Limpiamos los datos locales
     localStorage.removeItem("revida_usuario");
-    // Borramos la cookie del token
+    // Borramos la cookie del token manualemente, aunque el backend también indique su expiración con HttpOnly
     document.cookie = "revida_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Strict; Secure";
     
     // Avisamos al sistema del cambio
@@ -52,7 +65,22 @@ export async function logout() {
     window.location.href = '/auth/login';
 }
 
-/** 4. FUNCIONES DE APOYO (Para useAuth y Navbar) */
+/** 4. VALIDAR SESION EN EL SERVIDOR (Multi-pestaña y caducidad) */
+export async function validateSession() {
+    try {
+        const res = await fetch(`${API_URL}/api/validate-session`, {
+            method: "GET",
+            headers: { "Content-Type": "application/json" },
+            credentials: "include",
+        });
+        const data = await res.json();
+        return { ok: res.ok, data };
+    } catch (e) {
+        return { ok: false, error: e.message };
+    }
+}
+
+/** 5. FUNCIONES DE APOYO (Para useAuth y Navbar) */
 export function getToken() {
     if (typeof window === "undefined") return null;
     const name = "revida_token=";
@@ -69,4 +97,35 @@ export function getUsuarioSesion() {
     const data = localStorage.getItem("revida_usuario");
     if (!data) return null;
     try { return JSON.parse(data); } catch { return null; }
+}
+
+/** 6. GESTIÓN DE USUARIOS (CRUD Básico) */
+export async function getUsuarios() {
+    const res = await fetch(`${API_URL}/api/usuarios`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Error al obtener usuarios");
+    return data;
+}
+
+export async function getUsuario(id) {
+    const res = await fetch(`${API_URL}/api/usuarios/${id}`);
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || `El usuario con ID ${id} no existe`);
+    return data;
+}
+
+export async function crearUsuario(nombre) {
+    const res = await fetch(`${API_URL}/api/usuarios`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ nombre }),
+    });
+    const data = await res.json();
+    if (!res.ok) {
+        if (data.message && data.message.includes('obligatorio')) {
+            throw new Error("El campo 'nombre' es obligatorio");
+        }
+        throw new Error(data.message || "Error al crear usuario");
+    }
+    return data;
 }

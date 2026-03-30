@@ -54,8 +54,8 @@ const handleSubmit = async (e) => {
     try {
       const result = await loginUsuario(formData.email, formData.password);
 
-      // Redirigir según rol
-      if (result.rol === 'admin') {
+      // Redirigir según rol devuelto por el backend
+      if (result.datos?.rol === 'Administrador' || result.rol === 'admin') {
         router.push('/dashboard/usuarios');
       } else {
         router.push('/dashboard/mis-donativos');
