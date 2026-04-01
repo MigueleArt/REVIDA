@@ -4,6 +4,7 @@ import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
 import { loginUsuario } from '../../../services/api';
 import useReducedMotion from '../../../hooks/useReducedMotion';
+import Link from 'next/link';
 
 export default function LoginPage() {
   const router = useRouter();
@@ -53,8 +54,8 @@ const handleSubmit = async (e) => {
     try {
       const result = await loginUsuario(formData.email, formData.password);
 
-      // Redirigir según rol
-      if (result.rol === 'admin') {
+      // Redirigir según rol devuelto por el backend
+      if (result.datos?.rol === 'Administrador' || result.rol === 'admin') {
         router.push('/dashboard/usuarios');
       } else {
         router.push('/dashboard/mis-donativos');
@@ -73,8 +74,7 @@ const handleSubmit = async (e) => {
       setErrors({ ...errors, general: mensajeError });
       passwordRef.current?.focus();
     } finally {
-      // ESTO HACE QUE EL LOGIN SEA FLUIDO:
-      // El botón se desbloquea SIEMPRE, ya sea que salga bien o mal.
+      
       setIsLoading(false); 
     }
   };
@@ -222,6 +222,24 @@ const handleSubmit = async (e) => {
               </p>
             )}
           </div>
+          {}
+
+
+
+<div style={{ textAlign: 'right', marginBottom: '20px' }}>
+  <Link 
+    href="/auth/forgot-password" 
+    style={{ 
+      color: '#2563EB', 
+      fontSize: '0.85rem', 
+      textDecoration: 'none',
+      fontWeight: '500' 
+    }}
+    aria-label="¿Olvidaste tu contraseña? Haz clic aquí para iniciar el proceso de recuperación"
+  >
+    ¿Olvidaste tu contraseña?
+  </Link>
+</div>
 
           {/* Botón de enviar */}
           <button
