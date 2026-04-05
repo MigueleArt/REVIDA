@@ -2,7 +2,7 @@
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
-import { registrarUsuario } from '../../../services/api';
+import { crearUsuario } from '../../../services/api';
 
 export default function RegisterPage() {
   const router = useRouter();
@@ -16,7 +16,7 @@ export default function RegisterPage() {
     setError('');
 
     try {
-      await registrarUsuario(formData.nombre, formData.email, formData.password);
+      await crearUsuario(formData.nombre, formData.email, formData.password);
       // Si se crea bien, lo mandamos al login para que entre
       router.push('/auth/login?registered=true');
     } catch (err) {

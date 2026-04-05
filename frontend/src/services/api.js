@@ -4,7 +4,7 @@
 
 
 
-const API_URL = "https://revida.onrender.com";
+const API_URL = "http://localhost:3001";
 
 /** 1. RECUPERAR CONTRASEÑA  */
 export async function solicitarRecuperacion(email) {
@@ -116,7 +116,7 @@ export async function getUsuario(id) {
 }
 
 /** 6. REGISTRO DE NUEVO USUARIO */
-export async function registrarUsuario(nombre, email, password) {
+export async function crearUsuario(nombre, email, password) {
     const res = await fetch(`${API_URL}/api/usuarios`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
