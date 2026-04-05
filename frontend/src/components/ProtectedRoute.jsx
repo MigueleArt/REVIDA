@@ -26,7 +26,7 @@ export default function ProtectedRoute({ allowedRoles = [], children }) {
 
         if (allowedRoles.length > 0 && !allowedRoles.includes(rol)) {
             // Redirigir al panel por defecto según su rol
-            const defaultRoute = rol === 'admin'
+            const defaultRoute = (rol === 'admin' || rol === 'Administrador')
                 ? '/dashboard/usuarios'
                 : '/dashboard/mis-donativos';
             router.replace(defaultRoute);

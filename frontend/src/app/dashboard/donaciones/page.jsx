@@ -1,9 +1,6 @@
-export default function DonacionesPage() {
-  return (
-    <div style={{ padding: '2rem' }}>
-      <h1>Sección de Donaciones</h1>
-      <p>Aquí aparecerá el listado de donaciones disponibles.</p>
-      
-    </div>
-  );
+import { redirect } from 'next/navigation';
+
+export default function DashboardDonacionesPage() {
+    // Redirigir a la vista unificada de donaciones
+    redirect('/dashboard/mis-donativos');
 }
