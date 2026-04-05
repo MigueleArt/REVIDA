@@ -116,16 +116,21 @@ export async function getUsuario(id) {
 }
 
 /** 6. REGISTRO DE NUEVO USUARIO */
-export async function crearUsuario(nombre, email, password) {
+export async function crearUsuario(nombre, email, password, rol) {
+    // Si 'rol' tiene valor, lo usamos; si no, no lo incluimos en el envío
+    const datosAEnviar = { nombre, email, password };
+    if (rol) datosAEnviar.rol = rol;
+
     const res = await fetch(`${API_URL}/api/usuarios`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre, email, password, rol: 'Donante' }), // Asignamos un rol por defecto
+        body: JSON.stringify(datosAEnviar), 
     });
+    
     const data = await res.json();
     
     if (!res.ok) {
-        throw new Error(data.message || "Error al crear la cuenta. Intenta con otro correo.");
+        throw new Error(data.message || "Error al crear la cuenta.");
     }
     return data;
 }
