@@ -3,7 +3,7 @@
 // ============================================================
 
 // Por defecto usamos el backend local, o el de una variable de entorno en producción
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://revida.onrender.com";
 
 /** 1. RECUPERAR CONTRASEÑA  */
 export async function solicitarRecuperacion(email) {
@@ -42,7 +42,7 @@ export async function loginUsuario(email, password) {
 /** 3. LOGOUT REAL */
 export async function logout() {
     if (typeof window === "undefined") return;
-    
+
     try {
         await fetch(`${API_URL}/api/logout`, {
             method: "POST",
@@ -57,10 +57,10 @@ export async function logout() {
     localStorage.removeItem("revida_usuario");
     // Borramos la cookie del token manualemente, aunque el backend también indique su expiración con HttpOnly
     document.cookie = "revida_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Strict; Secure";
-    
+
     // Avisamos al sistema del cambio
     window.dispatchEvent(new Event('storage'));
-    
+
     // Redirigimos al login
     window.location.href = '/auth/login';
 }
@@ -85,7 +85,7 @@ export function getToken() {
     if (typeof window === "undefined") return null;
     const name = "revida_token=";
     const ca = document.cookie.split(';');
-    for(let i = 0; i < ca.length; i++) {
+    for (let i = 0; i < ca.length; i++) {
         let c = ca[i].trim();
         if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
     }
