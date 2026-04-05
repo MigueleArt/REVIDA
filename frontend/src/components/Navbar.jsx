@@ -21,11 +21,11 @@ export default function Navbar() {
 
   // --- Enlaces de navegación filtrados por rol ---
   const allLinks = [
-    { href: '/dashboard/mis-donativos', label: 'Donaciones', roles: ['admin', 'donador'], icon: 'home' },
-    { href: '/dashboard/publicar', label: 'Donar', roles: ['admin', 'donador'], icon: 'plus' },
-    { href: '#', label: 'Mensajes', roles: ['admin', 'donador'], icon: 'chat' },
-    { href: '/dashboard', label: 'Solicitudes', roles: ['admin'], icon: 'doc' },
-    { href: '/dashboard/usuarios', label: 'Usuarios', roles: ['admin'], icon: 'users' },
+    { href: '/dashboard/mis-donativos', label: 'Donaciones', roles: ['admin', 'Administrador', 'donador', 'Donador', 'org', 'Organizacion'], icon: 'home' },
+    { href: '/dashboard/publicar', label: 'Donar', roles: ['admin', 'Administrador', 'donador', 'Donador', 'org', 'Organizacion'], icon: 'plus' },
+    { href: '/mensajes', label: 'Mensajes', roles: ['admin', 'Administrador', 'donador', 'Donador', 'org', 'Organizacion'], icon: 'chat' },
+    { href: '/dashboard', label: 'Solicitudes', roles: ['admin', 'Administrador'], icon: 'doc' },
+    { href: '/dashboard/usuarios', label: 'Usuarios', roles: ['admin', 'Administrador'], icon: 'users' },
   ];
 
   const visibleLinks = allLinks.filter(
@@ -104,9 +104,11 @@ export default function Navbar() {
           </Link>
 
           <div style={{ display: 'flex', alignItems: 'center', gap: '20px' }}>
-            <span style={{ fontSize: '0.95rem', color: '#4B5563' }}>
-              Hola, <b style={{ color: '#111827' }}>{displayName}</b>
-            </span>
+            <Link href="/perfil" style={{ textDecoration: 'none' }}>
+              <span style={{ fontSize: '0.95rem', color: '#4B5563', cursor: 'pointer' }}>
+                Hola, <b style={{ color: '#111827' }}>{displayName}</b>
+              </span>
+            </Link>
             <button
               onClick={handleLogout}
               style={styles.logoutButton}
@@ -122,12 +124,23 @@ export default function Navbar() {
 
         <div style={{ padding: '12px 0' }}>
           <nav aria-label="Navegación principal" style={{ display: 'flex', gap: '10px' }}>
-            {visibleLinks.map((link) => (
-              <Link key={link.href + link.label} href={link.href} style={linkBase}>
-                {renderIcon(link.icon)}
-                {link.label}
-              </Link>
-            ))}
+            {visibleLinks.map((link) => {
+              const isActive = link.href === '/dashboard' 
+                ? pathname === '/dashboard' 
+                : (pathname === link.href || pathname.startsWith(link.href + '/'));
+                
+              return (
+                <Link key={link.href + link.label} href={link.href} style={{
+                    ...linkBase,
+                    color: isActive ? '#2563EB' : '#6B7280',
+                    backgroundColor: isActive ? '#EFF6FF' : 'transparent',
+                    fontWeight: isActive ? '700' : '500'
+                }}>
+                  {renderIcon(link.icon)}
+                  {link.label}
+                </Link>
+              );
+            })}
           </nav>
         </div>
 
