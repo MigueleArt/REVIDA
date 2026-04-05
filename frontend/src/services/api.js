@@ -2,8 +2,9 @@
 // Capa de servicios — CONEXIÓN REAL BACKEND REVIDA
 // ============================================================
 
-// Por defecto usamos el backend local, o el de una variable de entorno en producción
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+
+
+const API_URL = "https://revida.onrender.com";
 
 /** 1. RECUPERAR CONTRASEÑA  */
 export async function solicitarRecuperacion(email) {
@@ -114,18 +115,17 @@ export async function getUsuario(id) {
     return data;
 }
 
-export async function crearUsuario(nombre) {
+/** 6. REGISTRO DE NUEVO USUARIO */
+export async function registrarUsuario(nombre, email, password) {
     const res = await fetch(`${API_URL}/api/usuarios`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ nombre }),
+        body: JSON.stringify({ nombre, email, password, rol: 'Donante' }), // Asignamos un rol por defecto
     });
     const data = await res.json();
+    
     if (!res.ok) {
-        if (data.message && data.message.includes('obligatorio')) {
-            throw new Error("El campo 'nombre' es obligatorio");
-        }
-        throw new Error(data.message || "Error al crear usuario");
+        throw new Error(data.message || "Error al crear la cuenta. Intenta con otro correo.");
     }
     return data;
 }
