@@ -3,7 +3,7 @@
 // ============================================================
 
 // Por defecto usamos el backend local, o el de una variable de entorno en producción
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://revida.onrender.com/";
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://revida.onrender.com";
 
 /** 1. RECUPERAR CONTRASEÑA  */
 export async function solicitarRecuperacion(email) {
@@ -101,14 +101,18 @@ export function getUsuarioSesion() {
 
 /** 6. GESTIÓN DE USUARIOS (CRUD Básico) */
 export async function getUsuarios() {
-    const res = await fetch(`${API_URL}/api/usuarios`);
+    const res = await fetch(`${API_URL}/api/usuarios`, {
+        credentials: "include"
+    });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Error al obtener usuarios");
     return data;
 }
 
 export async function getUsuario(id) {
-    const res = await fetch(`${API_URL}/api/usuarios/${id}`);
+    const res = await fetch(`${API_URL}/api/usuarios/${id}`, {
+        credentials: "include"
+    });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || `El usuario con ID ${id} no existe`);
     return data;
@@ -118,6 +122,7 @@ export async function crearUsuario(nombre) {
     const res = await fetch(`${API_URL}/api/usuarios`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify({ nombre }),
     });
     const data = await res.json();
