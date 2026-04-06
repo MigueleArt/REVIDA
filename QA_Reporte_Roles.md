@@ -12,3 +12,5 @@ Incluye las validaciones automatizadas para:
 
 *Captura de evidencia:*
 ![alt text](<Captura de pantalla 2026-04-05 224450.png>)
+![alt text](<Captura de pantalla 2026-04-05 224506.png>)
+![alt text](<Captura de pantalla 2026-04-05 224530.png>)
