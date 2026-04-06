@@ -2,9 +2,8 @@
 // Capa de servicios — CONEXIÓN REAL BACKEND REVIDA
 // ============================================================
 
-
-
-const API_URL = "http://localhost:3001";
+// Por defecto usamos el backend local, o el de una variable de entorno en producción
+const API_URL = process.env.NEXT_PUBLIC_API_URL || "https://revida.onrender.com";
 
 /** 1. RECUPERAR CONTRASEÑA  */
 export async function solicitarRecuperacion(email) {
@@ -43,7 +42,7 @@ export async function loginUsuario(email, password) {
 /** 3. LOGOUT REAL */
 export async function logout() {
     if (typeof window === "undefined") return;
-    
+
     try {
         await fetch(`${API_URL}/api/logout`, {
             method: "POST",
@@ -58,10 +57,10 @@ export async function logout() {
     localStorage.removeItem("revida_usuario");
     // Borramos la cookie del token manualemente, aunque el backend también indique su expiración con HttpOnly
     document.cookie = "revida_token=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC; SameSite=Strict; Secure";
-    
+
     // Avisamos al sistema del cambio
     window.dispatchEvent(new Event('storage'));
-    
+
     // Redirigimos al login
     window.location.href = '/auth/login';
 }
@@ -86,7 +85,7 @@ export function getToken() {
     if (typeof window === "undefined") return null;
     const name = "revida_token=";
     const ca = document.cookie.split(';');
-    for(let i = 0; i < ca.length; i++) {
+    for (let i = 0; i < ca.length; i++) {
         let c = ca[i].trim();
         if (c.indexOf(name) === 0) return c.substring(name.length, c.length);
     }
@@ -102,14 +101,18 @@ export function getUsuarioSesion() {
 
 /** 6. GESTIÓN DE USUARIOS (CRUD Básico) */
 export async function getUsuarios() {
-    const res = await fetch(`${API_URL}/api/usuarios`);
+    const res = await fetch(`${API_URL}/api/usuarios`, {
+        credentials: "include"
+    });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || "Error al obtener usuarios");
     return data;
 }
 
 export async function getUsuario(id) {
-    const res = await fetch(`${API_URL}/api/usuarios/${id}`);
+    const res = await fetch(`${API_URL}/api/usuarios/${id}`, {
+        credentials: "include"
+    });
     const data = await res.json();
     if (!res.ok) throw new Error(data.message || `El usuario con ID ${id} no existe`);
     return data;
@@ -124,6 +127,7 @@ export async function crearUsuario(nombre, email, password, rol) {
     const res = await fetch(`${API_URL}/api/usuarios`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
+        credentials: "include",
         body: JSON.stringify(datosAEnviar), 
     });
     
