@@ -118,19 +118,23 @@ export async function getUsuario(id) {
     return data;
 }
 
-export async function crearUsuario(nombre) {
+/** 6. REGISTRO DE NUEVO USUARIO */
+export async function crearUsuario(nombre, email, password, rol) {
+    // Si 'rol' tiene valor, lo usamos; si no, no lo incluimos en el envío
+    const datosAEnviar = { nombre, email, password };
+    if (rol) datosAEnviar.rol = rol;
+
     const res = await fetch(`${API_URL}/api/usuarios`, {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
-        body: JSON.stringify({ nombre }),
+        body: JSON.stringify(datosAEnviar), 
     });
+    
     const data = await res.json();
+    
     if (!res.ok) {
-        if (data.message && data.message.includes('obligatorio')) {
-            throw new Error("El campo 'nombre' es obligatorio");
-        }
-        throw new Error(data.message || "Error al crear usuario");
+        throw new Error(data.message || "Error al crear la cuenta.");
     }
     return data;
 }
