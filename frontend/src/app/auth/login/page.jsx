@@ -255,8 +255,26 @@ const handleSubmit = async (e) => {
             {isLoading ? 'Cargando...' : 'Iniciar Sesión'}
           </button>
         </form>
+        
+
+        {/* --- NUEVO APARTADO DE REGISTRO --- */}
+        <div style={{ marginTop: '24px', paddingTop: '20px', borderTop: '1px solid #E5E7EB' }}>
+          <p style={{ color: '#6B7280', fontSize: '0.9rem', margin: 0 }}>
+            ¿No tienes una cuenta?{' '}
+            <Link 
+              href="/auth/register" 
+              style={{ color: '#2563EB', fontWeight: '600', textDecoration: 'none' }}
+            >
+              Regístrate aquí
+            </Link>
+          </p>
+        </div>
+        {/* --------------------------------- */}
 
       </div>
-    </div>
+    
+
+      </div>
+   
   );
 }
