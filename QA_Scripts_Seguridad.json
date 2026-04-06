@@ -1,0 +1,44 @@
+{
+	"info": {
+		"name": "QA - Tests de Seguridad y Roles",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+	},
+	"item": [
+		{
+			"name": "1. Acceso Denegado (Sin Token)",
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "http://localhost:3000/api/ruta-protegida",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "3000",
+					"path": ["api", "ruta-protegida"]
+				},
+				"description": "Prueba de regresión: Verifica que un usuario sin token reciba un error 401 Unauthorized."
+			}
+		},
+		{
+			"name": "2. Acceso Denegado (Rol Incorrecto)",
+			"request": {
+				"method": "GET",
+				"header": [
+					{
+						"key": "Authorization",
+						"value": "Bearer TOKEN_DE_USUARIO_NORMAL",
+						"type": "text"
+					}
+				],
+				"url": {
+					"raw": "http://localhost:3000/api/admin-dashboard",
+					"protocol": "http",
+					"host": ["localhost"],
+					"port": "3000",
+					"path": ["api", "admin-dashboard"]
+				},
+				"description": "Prueba de seguridad: Verifica que un usuario con rol 'USER' no pueda entrar a una ruta de 'ADMIN' (Error 403 Forbidden)."
+			}
+		}
+	]
+}
