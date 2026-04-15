@@ -4,9 +4,12 @@ import cors from 'cors';
 import cookieParser from 'cookie-parser';
 import dbConnect from '../lib/mongodb.js'; 
 import userRoutes from './routes/userRoutes.js';
+import { registerTestOnlyRoutes } from './testing/testRoutes.js';
 
 const app = express();
 const PORT = process.env.PORT || 3001;
+
+export const activeSessions = new Map();
 
 // Conexión a la base de datos
 dbConnect();
@@ -29,8 +32,11 @@ app.get('/', (req, res) => {
   res.status(200).send("Servidor REVIDA Online 🚀");
 });
 
-// Rutas de la API
 app.use('/api/usuarios', userRoutes);
+
+if (process.env.NODE_ENV === 'test') {
+  registerTestOnlyRoutes(app, activeSessions);
+}
 
 // Manejador de errores para depurar si algo falla internamente
 app.use((err, req, res, next) => {
@@ -38,6 +44,10 @@ app.use((err, req, res, next) => {
   res.status(500).send('Algo salió mal en el servidor');
 });
 
-app.listen(PORT, () => {
-  console.log(`Servidor escuchando en el puerto ${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+  app.listen(PORT, () => {
+    console.log(`Servidor escuchando en el puerto ${PORT}`);
+  });
+}
+
+export default app;
