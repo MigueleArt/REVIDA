@@ -2,8 +2,7 @@
 // Capa de servicios — CONEXIÓN REAL BACKEND REVIDA
 // ============================================================
 
-// Por defecto usamos el backend local, o el de una variable de entorno en producción
-const API_URL = process.env.NEXT_PUBLIC_API_URL || "http://localhost:3001";
+const API_URL = "https://revida.onrender.com";
 
 /** 1. RECUPERAR CONTRASEÑA  */
 export async function solicitarRecuperacion(email) {
@@ -129,3 +128,78 @@ export async function crearUsuario(nombre) {
     }
     return data;
 }
+
+/** 7. GESTIÓN DE MENSAJES */
+export async function getChats() {
+    const res = await fetch(`${API_URL}/api/mensajes`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Error al obtener los mensajes");
+    return data; // Se espera que el backend devuelva el array de chats
+}
+
+/** 8. GESTIÓN DE DONACIONES */
+export async function getDonaciones() {
+    const res = await fetch(`${API_URL}/api/donaciones`, {
+        method: "GET",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Error al obtener donaciones");
+    return data;
+}
+
+export async function crearDonacion(formData) {
+    const res = await fetch(`${API_URL}/api/donaciones`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify(formData),
+    });
+    const data = await res.json();
+    if (!res.ok) throw new Error(data.message || "Error al publicar donación");
+    return data;
+}
+
+export async function publicarDonacion(datosFormulario) {
+  // 1. Creamos el contenedor especial para archivos y texto
+  const dataToSend = new FormData();
+  
+  // 2. Agregamos los campos de texto normales
+  dataToSend.append('titulo', datosFormulario.titulo);
+  dataToSend.append('descripcion', datosFormulario.descripcion);
+  dataToSend.append('categoria', datosFormulario.categoria);
+  dataToSend.append('condicion', datosFormulario.condicion);
+  dataToSend.append('ubicacion', datosFormulario.ubicacion);
+  dataToSend.append('usuarioId', datosFormulario.usuarioId);
+
+  // 3. Agregamos la imagen SOLO si el usuario seleccionó una
+  if (datosFormulario.imagen) {
+    // 'imagen' es el nombre del campo que espera tu backend (Multer)
+    dataToSend.append('imagen', datosFormulario.imagen);
+  }
+
+  // 4. Hacemos la petición real
+  const res = await fetch(`${API_URL}/api/donaciones`, {
+    method: "POST",
+    // IMPORTANTE: Al usar FormData, NO definas 'Content-Type'. 
+    // El navegador lo hace automáticamente e incluye el boundary necesario.
+    credentials: "include", // Si usas cookies/sesiones
+    body: dataToSend,
+  });
+
+  if (!res.ok) {
+    const errorData = await res.json();
+    throw new Error(errorData.message || "Error al publicar en el servidor.");
+  }
+
+  return await res.json();
+}
+
+
+
+

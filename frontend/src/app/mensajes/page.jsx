@@ -1,48 +1,37 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react'; // Añadimos useEffect
 import useAuth from '../../hooks/useAuth';
+import { getChats } from '../../services/api';
 
 export default function MensajesPage() {
   const { usuario } = useAuth();
-  const [activeChat, setActiveChat] = useState(1);
+  const [activeChat, setActiveChat] = useState(null); // Empezamos sin chat seleccionado
   const [mensaje, setMensaje] = useState('');
+  const [chats, setChats] = useState([]); // Array vacío para llenar con la API
+  const [loading, setLoading] = useState(true);
 
-  // Mock data for chats
-  const [chats, setChats] = useState([
-    {
-      id: 1,
-      nombre: 'Maria Gomez',
-      articulo: 'Silla de Ruedas',
-      avatar: 'M',
-      mensajes: [
-        { id: 1, text: 'Hola, me interesa la silla de ruedas.', sender: 'them', time: '10:30 AM' },
-        { id: 2, text: '¡Hola Maria! Sigue disponible. ¿Cuándo podrías pasar por ella?', sender: 'me', time: '10:35 AM' },
-        { id: 3, text: '¿Podría ser mañana por la tarde?', sender: 'them', time: '10:40 AM' }
-      ]
-    },
-    {
-      id: 2,
-      nombre: 'Juan Perez',
-      articulo: 'Ropa de Invierno',
-      avatar: 'J',
-      mensajes: [
-        { id: 1, text: '¿Aún tienes las chamarras?', sender: 'them', time: 'Ayer' },
-        { id: 2, text: 'Sí, las tengo todas.', sender: 'me', time: 'Ayer' }
-      ]
-    },
-    {
-      id: 3,
-      nombre: 'Colegio San José',
-      articulo: 'Libros de Texto',
-      avatar: 'C',
-      mensajes: [
-        { id: 1, text: 'Gracias por los libros, los niños están muy felices.', sender: 'them', time: 'Lunes' }
-      ]
+  // CARGAR CHATS REALES AL ENTRAR
+  useEffect(() => {
+    async function cargarDatos() {
+      try {
+        const datosReales = await getChats();
+        setChats(datosReales);
+        if (datosReales.length > 0) setActiveChat(datosReales[0].id);
+      } catch (error) {
+        console.error("Error cargando chats:", error);
+      } finally {
+        setLoading(false);
+      }
     }
-  ]);
+    cargarDatos();
+  }, []);
+
+  if (loading) return <div style={{ padding: '20px' }}>Cargando mensajes...</div>;
 
   const activeChatData = chats.find(c => c.id === activeChat);
+
+  // 
 
   const handleSend = (e) => {
     e.preventDefault();
@@ -216,6 +205,8 @@ export default function MensajesPage() {
               <button
                 type="submit"
                 disabled={!mensaje.trim()}
+                aria-label="Enviar mensaje"  // <-- ESTO ES LO QUE PIDEN
+                title="Enviar mensaje"
                 style={{
                   width: '50px', height: '50px', borderRadius: '50%',
                   backgroundColor: mensaje.trim() ? '#2563EB' : '#93C5FD',

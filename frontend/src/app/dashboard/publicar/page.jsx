@@ -1,236 +1,223 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useRef } from 'react';
 import { useRouter } from 'next/navigation';
-import useReducedMotion from '../../../hooks/useReducedMotion';
+import useAuth from '../../../hooks/useAuth';
+import { publicarDonacion } from '../../../services/api';
+import AccessibleLoader from '../../../components/AccessibleLoader';
 
 export default function PublicarPage() {
-  const router = useRouter();
-  const reducedMotion = useReducedMotion();
-  const [isSubmitting, setIsSubmitting] = useState(false);
-  const [success, setSuccess] = useState(false);
-  
-  const [formData, setFormData] = useState({
-    titulo: '',
-    descripcion: '',
-    categoria: 'Ropa',
-    condicion: 'Bueno',
-    ubicacion: '',
-    imagen: null
-  });
+    const { usuario } = useAuth();
+    const router = useRouter();
+    const fileInputRef = useRef(null); // Referencia para el input de archivo
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setFormData(prev => ({ ...prev, [name]: value }));
-  };
+    // --- ESTADOS ---
+    const [loading, setLoading] = useState(false);
+    const [error, setError] = useState(null);
+    const [previewUrl, setPreviewUrl] = useState(null); // Para mostrar la foto antes de subirla
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setIsSubmitting(true);
-    
-    // Simulate API call
-    setTimeout(() => {
-      setIsSubmitting(false);
-      setSuccess(true);
-      // After showing success for 2 seconds, redirect to donations list
-      setTimeout(() => {
-        router.push('/dashboard/mis-donativos');
-      }, 2000);
-    }, 1200);
-  };
+    const [formData, setFormData] = useState({
+        titulo: '',
+        descripcion: '',
+        categoria: 'Muebles',
+        condicion: 'Bueno',
+        ubicacion: '',
+        imagen: null // Aquí guardaremos el archivo binario
+    });
 
-  if (success) {
+    // --- MANEJADORES ---
+
+    // 1. Manejar el cambio de archivo (con previsualización)
+    const handleFileChange = (e) => {
+        const file = e.target.files[0];
+        if (file) {
+            // Guardar el archivo real para enviarlo
+            setFormData({...formData, imagen: file});
+            
+            // Crear una URL temporal para mostrar la previsualización
+            const reader = new FileReader();
+            reader.onloadend = () => {
+                setPreviewUrl(reader.result);
+            };
+            reader.readAsDataURL(file);
+        }
+    };
+
+    // 2. Enviar el formulario real
+    const handleSubmit = async (e) => {
+        e.preventDefault();
+        setLoading(true);
+        setError(null);
+
+        // Verificación básica
+        if (!usuario) {
+            setError("Debes estar autenticado para publicar.");
+            setLoading(false);
+            return;
+        }
+
+        try {
+            // Preparamos los datos incluyendo el ID de Alan
+            const datosFinales = {
+                ...formData,
+                usuarioId: usuario.id || usuario._id
+            };
+
+            // Llamada a la API (Paso 1)
+            await publicarDonacion(datosFinales);
+
+            // Éxito: Redirigir al dashboard para ver la nueva donación
+            router.push('/dashboard');
+            router.refresh(); // Forzar recarga de datos
+        } catch (err) {
+            console.error("Error al publicar:", err);
+            setError(err.message || "No se pudo conectar con el servidor en Render.");
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    if (loading) {
+        return (
+            <div style={{ padding: '60px', textAlign: 'center' }}>
+                <AccessibleLoader message="Subiendo tu donación y procesando la imagen..." />
+            </div>
+        );
+    }
+
     return (
-      <div style={{ padding: '40px', display: 'flex', justifyContent: 'center', alignItems: 'center', minHeight: '80vh', backgroundColor: '#F9FAFB' }}>
-        <div style={{ textAlign: 'center', backgroundColor: 'white', padding: '60px', borderRadius: '16px', boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' }}>
-          <div style={{ 
-            width: '80px', height: '80px', backgroundColor: '#D1FAE5', color: '#10B981', 
-            borderRadius: '50%', display: 'flex', alignItems: 'center', justifyContent: 'center', 
-            margin: '0 auto 24px', fontSize: '2rem' 
-          }}>
-            ✓
-          </div>
-          <h2 style={{ color: '#111827', fontSize: '1.8rem', marginBottom: '8px' }}>¡Donación Publicada!</h2>
-          <p style={{ color: '#6B7280', fontSize: '1.1rem' }}>Gracias por tu generosidad. Redirigiendo a tus donaciones...</p>
+        <div style={{ padding: '40px', maxWidth: '850px', margin: '0 auto', fontFamily: 'system-ui, sans-serif' }}>
+            
+            <header style={{ marginBottom: '32px' }}>
+                <h1 style={{ fontSize: '2.5rem', fontWeight: '800', color: '#111827', margin: '0 0 8px 0' }}>Publicar Donación</h1>
+                <p style={{ color: '#6B7280', fontSize: '1.1rem', margin: 0 }}>Esta información se guardará directamente en la base de datos real.</p>
+            </header>
+
+            {error && (
+                <div role="alert" style={{ backgroundColor: '#FEE2E2', color: '#991B1B', padding: '16px', borderRadius: '12px', marginBottom: '24px', border: '1px solid #F87171', fontWeight: '500' }}>
+                    ⚠️ Error: {error}
+                </div>
+            )}
+
+            <form onSubmit={handleSubmit} style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '32px' }}>
+                
+                {/* COLUMNA IZQUIERDA: DATOS */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '16px', border: '1px solid #E5E7EB' }}>
+                        <label style={labelStyle}>Título del Artículo *</label>
+                        <input 
+                            type="text" required placeholder="Ej. Cama Matrimonial, Laptop..."
+                            style={inputStyle}
+                            onChange={(e) => setFormData({...formData, titulo: e.target.value})}
+                        />
+                    </div>
+
+                    <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '16px', border: '1px solid #E5E7EB' }}>
+                        <label style={labelStyle}>Descripción Detallada *</label>
+                        <textarea 
+                            required rows="6" style={inputStyle}
+                            placeholder="Describe el estado, medidas, o cualquier detalle importante..."
+                            onChange={(e) => setFormData({...formData, descripcion: e.target.value})}
+                        ></textarea>
+                    </div>
+
+                    <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '16px' }}>
+                        <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '16px', border: '1px solid #E5E7EB' }}>
+                            <label style={labelStyle}>Categoría</label>
+                            <select style={inputStyle} value={formData.categoria} onChange={(e) => setFormData({...formData, categoria: e.target.value})}>
+                                <option value="Muebles">Muebles</option>
+                                <option value="Electrónicos">Electrónicos</option>
+                                <option value="Ropa">Ropa</option>
+                                <option value="Libros">Libros</option>
+                                <option value="Otros">Otros</option>
+                            </select>
+                        </div>
+                        <div style={{ backgroundColor: 'white', padding: '20px', borderRadius: '16px', border: '1px solid #E5E7EB' }}>
+                            <label style={labelStyle}>Condición</label>
+                            <select style={inputStyle} value={formData.condicion} onChange={(e) => setFormData({...formData, condicion: e.target.value})}>
+                                <option value="Nuevo">Nuevo</option>
+                                <option value="Bueno">Bueno (Poco uso)</option>
+                                <option value="Usado">Usado (Funcional)</option>
+                                <option value="Para Reparar">Para Reparar</option>
+                            </select>
+                        </div>
+                    </div>
+                </div>
+
+                {/* COLUMNA DERECHA: FOTO Y UBICACIÓN */}
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '24px' }}>
+                    
+                    {/* SECCIÓN DE FOTO */}
+                    <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '16px', border: '1px solid #E5E7EB', textAlign: 'center' }}>
+                        <label style={{...labelStyle, textAlign: 'left'}}>Foto del Artículo</label>
+                        
+                        {/* Input oculto */}
+                        <input 
+                            type="file" 
+                            accept="image/*" 
+                            ref={fileInputRef} 
+                            style={{ display: 'none' }} 
+                            onChange={handleFileChange} 
+                        />
+
+                        {/* Área de previsualización / clic */}
+                        <div 
+                            onClick={() => fileInputRef.current.click()}
+                            style={{
+                                width: '100%', height: '250px', borderRadius: '12px', border: '2px dashed #D1D5DB',
+                                backgroundColor: '#F9FAFB', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                                cursor: 'pointer', overflow: 'hidden', marginBottom: '16px', transition: '0.2s'
+                            }}
+                            onMouseOver={(e) => e.currentTarget.style.borderColor = '#2563EB'}
+                            onMouseOut={(e) => e.currentTarget.style.borderColor = '#D1D5DB'}
+                        >
+                            {previewUrl ? (
+                                <img src={previewUrl} alt="Previsualización" style={{ width: '100%', height: '100%', objectFit: 'cover' }} />
+                            ) : (
+                                <div style={{ color: '#6B7280', fontSize: '0.9rem' }}>
+                                    <svg width="40" height="40" fill="none" stroke="currentColor" strokeWidth="1.5" viewBox="0 0 24 24" style={{ marginBottom: '8px' }}>
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M6.827 6.175A2.31 2.31 0 015.186 7.23c-.38.054-.757.112-1.134.175C2.999 7.58 2.25 8.507 2.25 9.574V18a2.25 2.25 0 002.25 2.25h15A2.25 2.25 0 002.25 18V9.574c0-1.067-.75-1.994-1.802-2.169a47.865 47.865 0 00-1.134-.175 2.31 2.31 0 01-1.64-1.055l-.822-1.316a2.192 2.192 0 00-1.736-1.039 48.774 48.774 0 00-5.232 0 2.192 2.192 0 00-1.736 1.039l-.821 1.316z" />
+                                        <path strokeLinecap="round" strokeLinejoin="round" d="M16.5 12.75a4.5 4.5 0 11-9 0 4.5 4.5 0 019 0zM18.75 10.5h.008v.008h-.008V10.5z" />
+                                    </svg>
+                                    <p style={{margin: 0, fontWeight: '600'}}>Haz clic para subir foto</p>
+                                    <p style={{margin: '4px 0 0 0', fontSize: '0.8rem'}}>PNG, JPG o WEBP</p>
+                                </div>
+                            )}
+                        </div>
+                        {previewUrl && (
+                            <button type="button" onClick={() => { setPreviewUrl(null); setFormData({...formData, imagen: null}); }} style={{color: '#EF4444', background: 'none', border: 'none', cursor: 'pointer', fontSize: '0.9rem'}}>
+                                Eliminar foto
+                            </button>
+                        )}
+                    </div>
+
+                    <div style={{ backgroundColor: 'white', padding: '24px', borderRadius: '16px', border: '1px solid #E5E7EB' }}>
+                        <label style={labelStyle}>Ubicación / Zona de Entrega *</label>
+                        <input 
+                            type="text" required placeholder="Ej. Tehuacán Centro o Colonia..."
+                            style={inputStyle}
+                            onChange={(e) => setFormData({...formData, ubicacion: e.target.value})}
+                        />
+                    </div>
+
+                    {/* BOTONES DE ACCIÓN */}
+                    <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
+                        <button type="button" onClick={() => router.back()} style={btnSecundarioStyle}>
+                            Cancelar
+                        </button>
+                        <button type="submit" disabled={loading} style={btnPrimarioStyle}>
+                            {loading ? 'Publicando...' : 'Publicar'}
+                        </button>
+                    </div>
+                </div>
+            </form>
         </div>
-      </div>
     );
-  }
-
-  return (
-    <div style={{
-      padding: '40px 20px',
-      backgroundColor: '#F9FAFB',
-      minHeight: '100vh',
-      fontFamily: 'system-ui, sans-serif'
-    }}>
-      <div style={{ maxWidth: '800px', margin: '0 auto' }}>
-        
-        <header style={{ marginBottom: '32px' }}>
-          <h1 style={{ fontSize: '2.2rem', fontWeight: '800', color: '#111827', margin: '0 0 8px 0', letterSpacing: '-0.5px' }}>
-            Publicar Donación
-          </h1>
-          <p style={{ color: '#6B7280', fontSize: '1.1rem', margin: 0 }}>
-            Llena los detalles del artículo que deseas donar a la comunidad.
-          </p>
-        </header>
-
-        <form onSubmit={handleSubmit} style={{
-          backgroundColor: 'white',
-          borderRadius: '16px',
-          padding: '32px',
-          border: '1px solid #E5E7EB',
-          boxShadow: '0 4px 6px -1px rgba(0,0,0,0.05)',
-          display: 'flex',
-          flexDirection: 'column',
-          gap: '24px'
-        }}>
-          
-          <div style={{ display: 'grid', gridTemplateColumns: '1fr 1fr', gap: '24px' }}>
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={labelStyle}>Título del Artículo *</label>
-              <input 
-                type="text" 
-                name="titulo" 
-                required 
-                value={formData.titulo} 
-                onChange={handleChange}
-                placeholder="Ej. Laptop Asus, Ropa de invierno..." 
-                style={inputStyle} 
-              />
-            </div>
-
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={labelStyle}>Descripción *</label>
-              <textarea 
-                name="descripcion" 
-                required 
-                rows="4"
-                value={formData.descripcion} 
-                onChange={handleChange}
-                placeholder="Describe el estado del artículo, tallas, características, etc." 
-                style={{ ...inputStyle, resize: 'vertical' }} 
-              />
-            </div>
-
-            <div>
-              <label style={labelStyle}>Categoría</label>
-              <select name="categoria" value={formData.categoria} onChange={handleChange} style={inputStyle}>
-                <option value="Ropa">Ropa</option>
-                <option value="Electrónicos">Electrónicos</option>
-                <option value="Muebles">Muebles</option>
-                <option value="Libros">Libros</option>
-                <option value="Deportes">Deportes</option>
-                <option value="Otros">Otros</option>
-              </select>
-            </div>
-
-            <div>
-              <label style={labelStyle}>Condición</label>
-              <select name="condicion" value={formData.condicion} onChange={handleChange} style={inputStyle}>
-                <option value="Nuevo">Nuevo</option>
-                <option value="Como nuevo">Como nuevo</option>
-                <option value="Bueno">Bueno (uso normal)</option>
-                <option value="Aceptable">Aceptable (con detalles)</option>
-              </select>
-            </div>
-
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={labelStyle}>Ubicación / Zona de Entrega *</label>
-              <input 
-                type="text" 
-                name="ubicacion" 
-                required 
-                value={formData.ubicacion} 
-                onChange={handleChange}
-                placeholder="Ej. Centro de Tehuacán, Plaza Principal..." 
-                style={inputStyle} 
-              />
-            </div>
-
-            {/* Subida de Imagen (Simulada) */}
-            <div style={{ gridColumn: '1 / -1' }}>
-              <label style={labelStyle}>Fotografía del Artículo</label>
-              <div style={{
-                border: '2px dashed #D1D5DB',
-                borderRadius: '12px',
-                padding: '40px',
-                textAlign: 'center',
-                backgroundColor: '#F9FAFB',
-                cursor: 'pointer',
-                transition: reducedMotion ? 'none' : 'background-color 0.2s'
-              }}
-              onMouseOver={(e) => e.currentTarget.style.backgroundColor = '#F3F4F6'}
-              onMouseOut={(e) => e.currentTarget.style.backgroundColor = '#F9FAFB'}
-              >
-                <svg width="40" height="40" fill="none" stroke="#9CA3AF" strokeWidth="1.5" viewBox="0 0 24 24" style={{ margin: '0 auto 12px' }}>
-                  <path strokeLinecap="round" strokeLinejoin="round" d="M3 16.5v2.25A2.25 2.25 0 005.25 21h13.5A2.25 2.25 0 0021 18.75V16.5m-13.5-9L12 3m0 0l4.5 4.5M12 3v13.5" />
-                </svg>
-                <span style={{ color: '#4B5563', fontWeight: '500', fontSize: '1rem', display: 'block', marginBottom: '4px' }}>
-                  Haz clic para subir o arrastra una imagen
-                </span>
-                <span style={{ color: '#9CA3AF', fontSize: '0.85rem' }}>PNG, JPG hasta 5MB</span>
-              </div>
-            </div>
-          </div>
-
-          <div style={{ marginTop: '16px', display: 'flex', justifyContent: 'flex-end', gap: '16px' }}>
-            <button 
-              type="button" 
-              onClick={() => router.back()}
-              style={{
-                padding: '12px 24px', backgroundColor: 'transparent', border: '1px solid #D1D5DB',
-                borderRadius: '8px', color: '#4B5563', fontWeight: '600', fontSize: '1rem', cursor: 'pointer'
-              }}
-            >
-              Cancelar
-            </button>
-            <button 
-              type="submit" 
-              disabled={isSubmitting}
-              style={{
-                padding: '12px 32px', backgroundColor: '#2563EB', border: 'none',
-                borderRadius: '8px', color: 'white', fontWeight: '600', fontSize: '1rem', 
-                cursor: isSubmitting ? 'wait' : 'pointer',
-                display: 'flex', alignItems: 'center', gap: '8px',
-                boxShadow: '0 4px 6px -1px rgba(37, 99, 235, 0.2)'
-              }}
-            >
-              {isSubmitting ? (
-                <>
-                  <svg className="revida-spinner" width="18" height="18" viewBox="0 0 50 50">
-                    <circle cx="25" cy="25" r="20" fill="none" stroke="rgba(255,255,255,0.3)" strokeWidth="4" />
-                    <circle cx="25" cy="25" r="20" fill="none" stroke="white" strokeWidth="4" strokeLinecap="round" strokeDasharray="80, 200" />
-                  </svg>
-                  Publicando...
-                </>
-              ) : (
-                'Publicar Artículo'
-              )}
-            </button>
-          </div>
-        </form>
-      </div>
-    </div>
-  );
 }
 
-const labelStyle = {
-  display: 'block',
-  marginBottom: '8px',
-  fontWeight: '600',
-  color: '#374151',
-  fontSize: '0.95rem'
-};
+// --- ESTILOS REUTILIZABLES (Tailwind-like) ---
+const labelStyle = { display: 'block', marginBottom: '8px', fontWeight: '600', color: '#374151', fontSize: '0.95rem' };
+const inputStyle = { width: '100%', padding: '12px 16px', borderRadius: '10px', border: '1px solid #D1D5DB', fontSize: '1rem', outline: 'none', transition: 'border 0.2s' };
+const btnPrimarioStyle = { backgroundColor: '#2563EB', color: 'white', border: 'none', padding: '14px 28px', borderRadius: '12px', fontWeight: '700', fontSize: '1rem', cursor: 'pointer', boxShadow: '0 4px 6px rgba(37, 99, 235, 0.2)', transition: '0.2s' };
+const btnSecundarioStyle = { backgroundColor: 'white', color: '#374151', border: '1px solid #D1D5DB', padding: '14px 28px', borderRadius: '12px', fontWeight: '600', fontSize: '1rem', cursor: 'pointer' };
 
-const inputStyle = {
-  width: '100%',
-  padding: '12px 16px',
-  borderRadius: '8px',
-  border: '1px solid #D1D5DB',
-  outline: 'none',
-  fontSize: '1rem',
-  color: '#111827',
-  transition: 'border-color 0.2s',
-  fontFamily: 'inherit'
-};
