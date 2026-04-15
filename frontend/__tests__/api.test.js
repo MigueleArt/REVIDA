@@ -13,6 +13,9 @@ afterEach(() => {
     jest.restoreAllMocks();
 });
 
+// Definimos la URL real que usa tu servicio para no repetirla
+const API_URL = 'https://revida.onrender.com/api/usuarios';
+
 describe('API Service — getUsuarios', () => {
     it('retorna la lista de usuarios cuando el servidor responde OK', async () => {
         const mockData = { success: true, data: [{ id: 1, nombre: 'Alan' }] };
@@ -23,7 +26,8 @@ describe('API Service — getUsuarios', () => {
 
         const result = await getUsuarios();
         expect(result).toEqual(mockData);
-        expect(global.fetch).toHaveBeenCalledWith('http://localhost:3001/api/usuarios');
+        // CAMBIADO: Ahora espera la URL de Render
+        expect(global.fetch).toHaveBeenCalledWith(API_URL);
     });
 
     it('lanza error descriptivo cuando el servidor devuelve error', async () => {
@@ -47,7 +51,8 @@ describe('API Service — getUsuario', () => {
 
         const result = await getUsuario(2);
         expect(result).toEqual(mockData);
-        expect(global.fetch).toHaveBeenCalledWith('http://localhost:3001/api/usuarios/2');
+        // CAMBIADO: Ahora espera la URL de Render con el ID
+        expect(global.fetch).toHaveBeenCalledWith(`${API_URL}/2`);
     });
 
     it('lanza error cuando el usuario no existe (404)', async () => {
@@ -71,7 +76,8 @@ describe('API Service — crearUsuario', () => {
 
         const result = await crearUsuario('Sofia');
         expect(result).toEqual(mockData);
-        expect(global.fetch).toHaveBeenCalledWith('http://localhost:3001/api/usuarios', {
+        // CAMBIADO: Ahora espera la URL de Render en el POST
+        expect(global.fetch).toHaveBeenCalledWith(API_URL, {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ nombre: 'Sofia' }),
